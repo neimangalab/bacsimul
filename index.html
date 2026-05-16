@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,394 +10,618 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
 
+  <!-- ─── Chart.js pour le graphique radar ─────────────────────────── -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
   <!-- ─── Tailwind CSS via CDN ──────────────────────────────────────── -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Sora', 'sans-serif'],
-            mono: ['DM Mono', 'monospace'],
+            sans: ['Sora','sans-serif'],
+            mono: ['DM Mono','monospace'],
           },
-          colors: {
-            royal:   { DEFAULT: '#1e40af', light: '#3b5fd6', dark: '#162d80' },
-            mint:    { DEFAULT: '#10b981', light: '#34d399', dark: '#059669' },
-            amber:   { DEFAULT: '#f59e0b' },
-            rose:    { DEFAULT: '#f43f5e' },
-            slate:   { 50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',
-                       400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',
-                       800:'#1e293b',900:'#0f172a' },
-          },
-          boxShadow: {
-            'card':    '0 4px 24px -4px rgba(30,64,175,0.13)',
-            'card-lg': '0 8px 40px -8px rgba(30,64,175,0.18)',
-            'glow-mint':'0 0 22px rgba(16,185,129,0.35)',
-            'glow-royal':'0 0 22px rgba(30,64,175,0.30)',
-          },
-          backgroundImage: {
-            'hero-mesh': `
-              radial-gradient(at 20% 10%, rgba(59,95,214,0.18) 0%, transparent 50%),
-              radial-gradient(at 80% 90%, rgba(16,185,129,0.13) 0%, transparent 50%),
-              radial-gradient(at 60% 30%, rgba(30,64,175,0.08) 0%, transparent 45%)
-            `,
-          }
         }
       }
     };
   </script>
 
   <style>
-    /* ───────── Global reset & base ──────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; }
+    /* ══════════════════════════════════════════════════════════════
+       DESIGN TOKENS — Mode clair
+    ══════════════════════════════════════════════════════════════ */
+    :root {
+      --bg-page:     #f1f5f9;
+      --bg-card:     #ffffff;
+      --bg-sub:      #f8fafc;
+      --bg-input:    #f8fafc;
+      --border:      #e2e8f0;
+      --border-soft: #f1f5f9;
+      --tx-primary:  #1e293b;
+      --tx-muted:    #64748b;
+      --tx-faint:    #94a3b8;
+      --nav-bg:      rgba(255,255,255,.86);
+      --mesh1: rgba(59,95,214,.12);
+      --mesh2: rgba(16,185,129,.10);
+      --mesh3: rgba(30,64,175,.07);
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       DESIGN TOKENS — Mode sombre
+    ══════════════════════════════════════════════════════════════ */
+    html.dark {
+      --bg-page:     #0f172a;
+      --bg-card:     #1e293b;
+      --bg-sub:      #152035;
+      --bg-input:    #0f172a;
+      --border:      #334155;
+      --border-soft: #1e293b;
+      --tx-primary:  #f1f5f9;
+      --tx-muted:    #94a3b8;
+      --tx-faint:    #475569;
+      --nav-bg:      rgba(15,23,42,.88);
+      --mesh1: rgba(59,95,214,.20);
+      --mesh2: rgba(16,185,129,.14);
+      --mesh3: rgba(30,64,175,.12);
+    }
+
+    /* ── Transition douce sur le changement de thème ── */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      transition: background-color .3s ease, border-color .3s ease, color .2s ease;
+    }
     html { scroll-behavior: smooth; }
+
     body {
       font-family: 'Sora', sans-serif;
-      background-color: #f1f5f9;
+      background-color: var(--bg-page);
       background-image:
-        radial-gradient(at 10% 5%,  rgba(59,95,214,.12) 0%, transparent 45%),
-        radial-gradient(at 90% 95%, rgba(16,185,129,.10) 0%, transparent 45%),
-        radial-gradient(at 70% 25%, rgba(30,64,175,.07) 0%, transparent 40%);
+        radial-gradient(at 10% 5%,  var(--mesh1) 0%, transparent 45%),
+        radial-gradient(at 90% 95%, var(--mesh2) 0%, transparent 45%),
+        radial-gradient(at 70% 25%, var(--mesh3) 0%, transparent 40%);
       min-height: 100vh;
-      color: #1e293b;
+      color: var(--tx-primary);
     }
 
-    /* ───────── Animations ───────────────────────────────────────── */
+    /* ── Helpers ── */
+    .t-primary { color: var(--tx-primary); }
+    .t-muted   { color: var(--tx-muted);   }
+    .t-faint   { color: var(--tx-faint);   }
+    .card  { background: var(--bg-card); border: 1px solid var(--border); border-radius: 1rem; }
+    .sub   { background: var(--bg-sub);  border: 1px solid var(--border-soft); border-radius: .75rem; }
+
+    /* ══════════════════════════════════════════════════════════════
+       ANIMATIONS
+    ══════════════════════════════════════════════════════════════ */
     @keyframes fadeSlideUp {
-      from { opacity: 0; transform: translateY(22px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from { opacity:0; transform:translateY(20px); }
+      to   { opacity:1; transform:translateY(0); }
     }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
-    @keyframes pulse-ring {
-      0%   { box-shadow: 0 0 0 0 rgba(16,185,129,.45); }
-      70%  { box-shadow: 0 0 0 12px rgba(16,185,129,0); }
-      100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
-    }
-    @keyframes countUp {
-      from { opacity: 0; transform: scale(0.75); }
-      to   { opacity: 1; transform: scale(1); }
-    }
-    @keyframes shimmer {
-      0%   { background-position: -400px 0; }
-      100% { background-position: 400px 0; }
+    @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
+    @keyframes countUp { from{opacity:0;transform:scale(.75)} to{opacity:1;transform:scale(1)} }
+    @keyframes pulseRing {
+      0%  { box-shadow:0 0 0 0 rgba(16,185,129,.45); }
+      70% { box-shadow:0 0 0 14px rgba(16,185,129,0); }
+      100%{ box-shadow:0 0 0 0 rgba(16,185,129,0); }
     }
 
-    .animate-fade-slide-up  { animation: fadeSlideUp  .55s cubic-bezier(.22,1,.36,1) both; }
-    .animate-fade-in        { animation: fadeIn        .4s ease both; }
-    .animate-count-up       { animation: countUp       .5s cubic-bezier(.22,1,.36,1) both; }
+    .anim-up    { animation: fadeSlideUp .55s cubic-bezier(.22,1,.36,1) both; }
+    .anim-in    { animation: fadeIn .4s ease both; }
+    .anim-count { animation: countUp .5s cubic-bezier(.22,1,.36,1) both; }
+    .s1 { animation-delay:.07s; } .s2 { animation-delay:.14s; }
+    .s3 { animation-delay:.21s; } .s4 { animation-delay:.28s; }
 
-    /* staggered delays for series cards */
-    .stagger-1 { animation-delay: .07s; }
-    .stagger-2 { animation-delay: .14s; }
-    .stagger-3 { animation-delay: .21s; }
-    .stagger-4 { animation-delay: .28s; }
-
-    /* ───────── Navbar ───────────────────────────────────────────── */
+    /* ══════════════════════════════════════════════════════════════
+       NAVBAR
+    ══════════════════════════════════════════════════════════════ */
     #navbar {
-      background: rgba(255,255,255,.82);
+      background: var(--nav-bg);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       border-bottom: 1px solid rgba(30,64,175,.09);
     }
 
-    /* ───────── Series selection cards ──────────────────────────── */
+    /* ══════════════════════════════════════════════════════════════
+       TOGGLE MODE SOMBRE
+    ══════════════════════════════════════════════════════════════ */
+    .dm-track {
+      width:48px; height:26px; border-radius:999px; cursor:pointer;
+      border:none; position:relative; flex-shrink:0;
+      background: #e2e8f0;
+      transition: background .3s;
+    }
+    html.dark .dm-track { background:#1e40af; }
+    .dm-track::after {
+      content:''; position:absolute; top:3px; left:3px;
+      width:20px; height:20px; border-radius:50%;
+      background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.25);
+      transition: transform .3s cubic-bezier(.22,1,.36,1);
+    }
+    html.dark .dm-track::after { transform:translateX(22px); }
+
+    /* ══════════════════════════════════════════════════════════════
+       CARTES SÉRIE
+    ══════════════════════════════════════════════════════════════ */
     .serie-card {
-      cursor: pointer;
-      transition: transform .22s cubic-bezier(.22,1,.36,1),
-                  box-shadow .22s ease,
-                  border-color .2s ease;
-      border: 2px solid transparent;
-      background: white;
+      cursor:pointer; border:2px solid transparent;
+      background:var(--bg-card); border-radius:1rem;
+      transition:transform .22s cubic-bezier(.22,1,.36,1), box-shadow .22s, border-color .2s;
     }
-    .serie-card:hover {
-      transform: translateY(-5px) scale(1.02);
-      box-shadow: 0 12px 40px -8px rgba(30,64,175,.22);
-      border-color: #3b5fd6;
-    }
-    .serie-card:active { transform: scale(.97); }
+    .serie-card:hover { transform:translateY(-5px) scale(1.02); box-shadow:0 12px 40px -8px rgba(30,64,175,.22); border-color:#3b5fd6; }
+    .serie-card:active { transform:scale(.97); }
 
-    /* ───────── Input validation colors ─────────────────────────── */
+    /* ══════════════════════════════════════════════════════════════
+       INPUTS
+    ══════════════════════════════════════════════════════════════ */
     .note-input {
-      transition: border-color .2s, box-shadow .2s;
-      border: 2px solid #cbd5e1;
-      outline: none;
+      border:2px solid var(--border); background:var(--bg-input);
+      color:var(--tx-primary); outline:none;
+      transition:border-color .2s, box-shadow .2s;
     }
-    .note-input:focus        { border-color: #3b5fd6; box-shadow: 0 0 0 3px rgba(59,95,214,.15); }
-    .note-input.valid        { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,.13); }
-    .note-input.warning      { border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,.13); }
-    .note-input.invalid      { border-color: #f43f5e; box-shadow: 0 0 0 3px rgba(244,63,94,.12); }
+    .note-input:focus   { border-color:#3b5fd6; box-shadow:0 0 0 3px rgba(59,95,214,.15); }
+    .note-input.ok      { border-color:#10b981; box-shadow:0 0 0 3px rgba(16,185,129,.13); }
+    .note-input.warn    { border-color:#f59e0b; box-shadow:0 0 0 3px rgba(245,158,11,.13); }
+    .note-input.bad     { border-color:#f43f5e; box-shadow:0 0 0 3px rgba(244,63,94,.12); }
 
-    /* ───────── Result badge ─────────────────────────────────────── */
-    .result-admis    { background: linear-gradient(135deg,#059669,#10b981); color: #fff; }
-    .result-second   { background: linear-gradient(135deg,#d97706,#f59e0b); color: #fff; }
-    .result-ajourn   { background: linear-gradient(135deg,#dc2626,#f43f5e); color: #fff; }
-
-    /* pulse animation for ADMIS badge */
-    .pulse-admis { animation: pulse-ring 1.8s cubic-bezier(.4,0,.6,1) 3; }
-
-    /* ───────── Mention badge ────────────────────────────────────── */
-    .mention-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: .35rem;
-      padding: .28rem .85rem;
-      border-radius: 9999px;
-      font-size: .82rem;
-      font-weight: 600;
-      letter-spacing: .03em;
-      animation: fadeSlideUp .4s .2s both;
+    /* ══════════════════════════════════════════════════════════════
+       BOUTONS
+    ══════════════════════════════════════════════════════════════ */
+    .btn-main {
+      background:linear-gradient(135deg,#1e40af,#3b5fd6); color:#fff;
+      box-shadow:0 4px 18px -4px rgba(30,64,175,.45);
+      transition:transform .18s, box-shadow .18s, filter .18s;
     }
-    .mention-tb  { background:#d1fae5; color:#065f46; border: 1.5px solid #6ee7b7; }
-    .mention-b   { background:#dbeafe; color:#1e40af; border: 1.5px solid #93c5fd; }
-    .mention-ab  { background:#fef3c7; color:#92400e; border: 1.5px solid #fcd34d; }
-    .mention-p   { background:#f1f5f9; color:#475569; border: 1.5px solid #cbd5e1; }
+    .btn-main:hover   { transform:translateY(-2px); box-shadow:0 8px 28px -4px rgba(30,64,175,.50); filter:brightness(1.07); }
+    .btn-main:active  { transform:scale(.97); }
 
-    /* ───────── Matiere row hover ────────────────────────────────── */
-    .matiere-row { transition: background .18s; }
-    .matiere-row:hover { background: rgba(30,64,175,.04); }
+    .btn-sec {
+      background:var(--bg-sub); color:var(--tx-muted);
+      border:1px solid var(--border);
+      transition:background .18s, transform .18s;
+    }
+    .btn-sec:hover { background:var(--border); transform:translateY(-1px); }
 
-    /* ───────── Bouton principal ─────────────────────────────────── */
-    .btn-calcul {
-      background: linear-gradient(135deg, #1e40af 0%, #3b5fd6 100%);
-      transition: transform .18s, box-shadow .18s, filter .18s;
-      box-shadow: 0 4px 18px -4px rgba(30,64,175,.45);
-    }
-    .btn-calcul:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 28px -4px rgba(30,64,175,.50);
-      filter: brightness(1.07);
-    }
-    .btn-calcul:active { transform: scale(.97); }
+    /* ══════════════════════════════════════════════════════════════
+       RÉSULTATS
+    ══════════════════════════════════════════════════════════════ */
+    .res-admis  { background:linear-gradient(135deg,#059669,#10b981); color:#fff; }
+    .res-second { background:linear-gradient(135deg,#d97706,#f59e0b); color:#fff; }
+    .res-ajourn { background:linear-gradient(135deg,#dc2626,#f43f5e); color:#fff; }
+    .pulse-ok   { animation:pulseRing 1.8s cubic-bezier(.4,0,.6,1) 3; }
 
-    .btn-reset {
-      transition: background .18s, transform .18s;
+    .mbadge {
+      display:inline-flex; align-items:center; gap:.3rem;
+      padding:.25rem .8rem; border-radius:999px;
+      font-size:.8rem; font-weight:600; letter-spacing:.03em;
+      animation:fadeSlideUp .4s .2s both;
     }
-    .btn-reset:hover { background: #e2e8f0; transform: translateY(-1px); }
+    .mb-tb { background:#d1fae5; color:#065f46; border:1.5px solid #6ee7b7; }
+    .mb-b  { background:#dbeafe; color:#1e40af; border:1.5px solid #93c5fd; }
+    .mb-ab { background:#fef3c7; color:#92400e; border:1.5px solid #fcd34d; }
+    .mb-p  { background:#f1f5f9; color:#475569; border:1.5px solid #cbd5e1; }
 
-    /* ───────── Progress bar ─────────────────────────────────────── */
-    .progress-bar-fill {
-      transition: width .8s cubic-bezier(.22,1,.36,1);
-      background: linear-gradient(90deg, #1e40af, #10b981);
+    /* ══════════════════════════════════════════════════════════════
+       BARRE DE PROGRESSION
+    ══════════════════════════════════════════════════════════════ */
+    .prog-track { height:.5rem; border-radius:999px; overflow:hidden; background:var(--border); }
+    .prog-fill  { height:100%; border-radius:999px; background:linear-gradient(90deg,#1e40af,#10b981); transition:width .8s cubic-bezier(.22,1,.36,1); }
+
+    /* ══════════════════════════════════════════════════════════════
+       NOTE MANQUANTE
+    ══════════════════════════════════════════════════════════════ */
+    #missing-block {
+      border-radius:.875rem;
+      border:1.5px solid rgba(245,158,11,.4);
+      background:rgba(245,158,11,.07);
+      animation:fadeSlideUp .4s both;
+    }
+    html.dark #missing-block { background:rgba(245,158,11,.12); }
+    .miss-row { border-bottom:1px solid rgba(245,158,11,.18); padding:.6rem 0; }
+    .miss-row:last-child { border-bottom:none; }
+
+    /* ══════════════════════════════════════════════════════════════
+       LIGNE MATIÈRE
+    ══════════════════════════════════════════════════════════════ */
+    .mat-row { transition:background .18s; }
+    .mat-row:hover { background:rgba(30,64,175,.05); }
+
+    @media(max-width:640px){ .coef-col{display:none;} }
+
+    /* ══════════════════════════════════════════════════════════════
+       COUNTDOWN BANNER — compact
+    ══════════════════════════════════════════════════════════════ */
+    #countdown-banner {
+      background: linear-gradient(120deg, #1e3a8a 0%, #1e40af 60%, #0f2d6b 100%);
+      border-radius: 1rem;
+      overflow: hidden;
+      position: relative;
+    }
+    #countdown-banner::before {
+      content:''; position:absolute; inset:0; pointer-events:none;
+      background:
+        radial-gradient(circle at 15% 60%, rgba(16,185,129,.15) 0%, transparent 50%),
+        radial-gradient(circle at 85% 20%, rgba(99,130,255,.20) 0%, transparent 45%);
     }
 
-    /* ───────── Section scroll reveal ───────────────────────────── */
-    .section-reveal {
-      opacity: 0;
-      transform: translateY(18px);
-      transition: opacity .5s ease, transform .5s cubic-bezier(.22,1,.36,1);
+    /* Ligne principale : phase + chiffres sur une seule bande */
+    .cd-strip {
+      display:flex; align-items:center; gap:.6rem;
+      flex-wrap:wrap;
     }
-    .section-reveal.visible {
-      opacity: 1;
-      transform: none;
+    .cd-pill {
+      display:flex; align-items:center; gap:.25rem;
+      background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.14);
+      border-radius:.55rem; padding:.2rem .55rem;
     }
+    .cd-num {
+      font-family:'DM Mono',monospace;
+      font-size:1rem; font-weight:700; color:#fff;
+      letter-spacing:-.01em; line-height:1;
+      min-width:1.8ch; text-align:center;
+    }
+    .cd-num.urgent { color:#fbbf24; animation:urgPulse .9s ease infinite; }
+    @keyframes urgPulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+    .cd-sep { color:rgba(255,255,255,.35); font-size:.85rem; font-weight:700; line-height:1; }
+    .cd-unit { font-size:.55rem; color:rgba(255,255,255,.50); font-weight:600; letter-spacing:.06em; text-transform:uppercase; }
 
-    /* ───────── Responsive table helper ─────────────────────────── */
-    @media (max-width: 640px) {
-      .coef-label { display: none; }
-      .coef-badge { font-size: .72rem; }
+    .phase-dot {
+      width:.42rem; height:.42rem; border-radius:50%; flex-shrink:0;
+      animation:blink 1.3s ease infinite;
     }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+    .phase-txt { font-size:.72rem; font-weight:600; color:rgba(255,255,255,.85); white-space:nowrap; }
+    .phase-date-txt { font-size:.65rem; color:rgba(255,255,255,.45); white-space:nowrap; }
+
+    /* ══════════════════════════════════════════════════════════════
+       MESSAGE MOTIVATION — discret, 1 ligne avec icône
+    ══════════════════════════════════════════════════════════════ */
+    #motiv-bar {
+      display:flex; align-items:flex-start; gap:.6rem;
+      padding:.55rem .85rem .6rem;
+      background:rgba(0,0,0,.18); border-top:1px solid rgba(255,255,255,.07);
+    }
+    #motiv-emoji { font-size:1rem; line-height:1.5; flex-shrink:0; }
+    #motiv-text  {
+      font-size:.73rem; line-height:1.55; color:rgba(255,255,255,.72);
+      font-weight:400;
+      /* Limiter à 2 lignes avec ellipsis */
+      display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+    }
+    #motiv-text.expanded { -webkit-line-clamp:unset; overflow:visible; }
+    #motiv-more {
+      font-size:.65rem; color:rgba(255,255,255,.40); cursor:pointer; flex-shrink:0;
+      background:none; border:none; padding:0; margin-top:.18rem; white-space:nowrap;
+      transition:color .2s;
+    }
+    #motiv-more:hover { color:rgba(255,255,255,.75); }
+
+
+    /* ══════════════════════════════════════════════════════════════
+       RECOMMANDATIONS SECOND TOUR
+    ══════════════════════════════════════════════════════════════ */
+    #reco-second {
+      border-radius:1rem;
+      background: linear-gradient(135deg,rgba(245,158,11,.06),rgba(239,68,68,.04));
+      border: 1.5px solid rgba(245,158,11,.35);
+      animation: fadeSlideUp .5s .1s both;
+    }
+    html.dark #reco-second {
+      background: linear-gradient(135deg,rgba(245,158,11,.10),rgba(239,68,68,.07));
+    }
+    .reco-mat-row {
+      display:flex; align-items:center; gap:.75rem;
+      padding:.65rem 0;
+      border-bottom:1px solid rgba(245,158,11,.15);
+    }
+    .reco-mat-row:last-child { border-bottom:none; }
+    .priority-bar {
+      height:.35rem; border-radius:999px;
+      background:linear-gradient(90deg,#f43f5e,#f59e0b);
+      transition: width .6s cubic-bezier(.22,1,.36,1);
+    }
+    .reco-tip {
+      display:inline-block;
+      font-size:.7rem; font-weight:600;
+      padding:.15rem .55rem; border-radius:999px;
+      white-space:nowrap;
+    }
+    .tip-urgent { background:rgba(244,63,94,.12); color:#dc2626; border:1px solid rgba(244,63,94,.25); }
+    .tip-fort   { background:rgba(245,158,11,.12); color:#b45309; border:1px solid rgba(245,158,11,.25); }
+    .tip-ok     { background:rgba(16,185,129,.10); color:#065f46; border:1px solid rgba(16,185,129,.22); }
   </style>
 </head>
-
 <body>
 
 <!-- ══════════════════════════════════════════════════════════════════
      NAVBAR
 ══════════════════════════════════════════════════════════════════ -->
 <nav id="navbar" class="fixed top-0 left-0 right-0 z-50">
-  <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-4">
 
-    <!-- Logo + Brand -->
-    <div class="flex items-center gap-3">
-      <!-- SVG Logo : mortier de diplômé + coche -->
-      <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <!-- Chapeau mortier (base) -->
+    <!-- Logo -->
+    <div class="flex items-center gap-3 shrink-0">
+      <svg width="36" height="36" viewBox="0 0 38 38" fill="none" aria-hidden="true">
         <rect x="4" y="18" width="30" height="5" rx="2.5" fill="#1e40af"/>
-        <!-- Dessus du chapeau (losange) -->
         <polygon points="19,5 35,16 19,21 3,16" fill="#1e40af"/>
-        <!-- Ruban / bande claire -->
         <polygon points="19,7 33,16.5 19,19.5 5,16.5" fill="#3b5fd6"/>
-        <!-- Corde pendante -->
         <line x1="34" y1="16" x2="34" y2="26" stroke="#1e40af" stroke-width="2.2" stroke-linecap="round"/>
         <circle cx="34" cy="27.5" r="2" fill="#10b981"/>
-        <!-- Coche de validation -->
         <circle cx="26" cy="30" r="6.5" fill="#10b981"/>
         <polyline points="22.5,30 25,32.5 29.5,27.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       </svg>
-      <span class="font-bold text-xl tracking-tight text-royal-dark">Bac<span class="text-mint">Simul</span></span>
+      <span class="font-bold text-xl tracking-tight t-primary">Bac<span style="color:#10b981">Simul</span></span>
     </div>
 
-    <!-- Badge pays -->
-    <span class="hidden sm:flex items-center gap-1.5 text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
-      <svg class="w-3.5 h-3.5 text-royal" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 110-12 6 6 0 010 12z" clip-rule="evenodd"/></svg>
+    <!-- Badge pays (masqué mobile) -->
+    <span class="hidden sm:flex items-center gap-1.5 text-xs font-medium t-muted px-3 py-1.5 rounded-full"
+      style="background:var(--bg-sub);border:1px solid var(--border)">
+      <svg class="w-3.5 h-3.5" style="color:#1e40af" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 110-12 6 6 0 010 12z" clip-rule="evenodd"/>
+      </svg>
       Baccalauréat · Djibouti
     </span>
+
+    <!-- Toggle dark mode (push à droite) -->
+    <div class="ml-auto flex items-center gap-2">
+      <!-- Soleil -->
+      <svg class="w-4 h-4 t-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+      <button class="dm-track" onclick="toggleDark()" aria-label="Basculer mode sombre"></button>
+      <!-- Lune -->
+      <svg class="w-4 h-4 t-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/>
+      </svg>
+    </div>
+
   </div>
 </nav>
 
-<!-- ══════════════════════════════════════════════════════════════════
-     MAIN WRAPPER
-══════════════════════════════════════════════════════════════════ -->
-<main class="max-w-5xl mx-auto px-4 sm:px-6 pt-28 pb-20" id="app">
 
-  <!-- ─── HERO ─────────────────────────────────────────────────── -->
-  <section id="hero" class="text-center mb-14 animate-fade-slide-up">
-    <span class="inline-block text-xs font-semibold tracking-widest uppercase text-mint bg-emerald-50 border border-emerald-200 px-4 py-1.5 rounded-full mb-5">
+<!-- ══════════════════════════════════════════════════════════════════
+     MAIN
+══════════════════════════════════════════════════════════════════ -->
+<main class="max-w-5xl mx-auto px-4 sm:px-6 pt-28 pb-20">
+
+  <!-- HERO -->
+  <section class="text-center mb-14 anim-up">
+    <span class="inline-block text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full mb-5"
+      style="color:#10b981;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25)">
       Outil 100 % officieux – à titre indicatif
     </span>
-    <h1 class="text-4xl sm:text-5xl font-extrabold text-slate-800 leading-tight mb-4">
-      Simule ta<br class="sm:hidden"/>
-      <span class="text-royal"> moyenne au Bac</span>
+    <h1 class="text-4xl sm:text-5xl font-extrabold leading-tight mb-4 t-primary">
+      Simule ta <span style="color:#1e40af">moyenne au Bac</span>
     </h1>
-    <p class="text-slate-500 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
-      Choisis ta série, saisis tes notes et découvre instantanément ta moyenne générale, ton verdict et ta mention.
+    <p class="t-muted text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
+      Choisis ta série, saisis tes notes et découvre ta moyenne, ton verdict et ta mention.
     </p>
   </section>
 
-  <!-- ─── SÉLECTION DE SÉRIE ────────────────────────────────────── -->
-  <section id="serie-section">
-    <h2 class="text-sm font-semibold text-slate-400 tracking-widest uppercase mb-5 text-center">
-      Quelle est ta série ?
-    </h2>
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12" id="serie-cards">
-      <!-- Les cartes sont générées dynamiquement par JS -->
+  <!-- ══════════════════════════════════════════════════════════════
+       COUNTDOWN — compact
+  ══════════════════════════════════════════════════════════════ -->
+  <div id="countdown-banner" class="mb-6 anim-up" style="animation-delay:.12s">
+    <!-- Bande principale : phase + chiffres -->
+    <div class="relative z-10 px-4 py-3 flex items-center justify-between flex-wrap gap-x-4 gap-y-2">
+
+      <!-- Phase (point clignotant + label + date) -->
+      <div class="flex items-center gap-2 min-w-0">
+        <span class="phase-dot" id="phase-dot" style="background:#10b981"></span>
+        <span class="phase-txt" id="phase-label">–</span>
+        <span class="phase-date-txt hidden sm:inline" id="phase-dates"></span>
+      </div>
+
+      <!-- Décompte compact J:H:M:S -->
+      <div class="cd-strip">
+        <div class="cd-pill">
+          <span class="cd-num" id="cd-j">–</span>
+          <span class="cd-unit">j</span>
+        </div>
+        <span class="cd-sep">:</span>
+        <div class="cd-pill">
+          <span class="cd-num" id="cd-h">–</span>
+          <span class="cd-unit">h</span>
+        </div>
+        <span class="cd-sep">:</span>
+        <div class="cd-pill">
+          <span class="cd-num" id="cd-m">–</span>
+          <span class="cd-unit">m</span>
+        </div>
+        <span class="cd-sep">:</span>
+        <div class="cd-pill">
+          <span class="cd-num" id="cd-s">–</span>
+          <span class="cd-unit">s</span>
+        </div>
+      </div>
+
     </div>
+
+    <!-- Bande motivation : 2 lignes max, extensible -->
+    <div id="motiv-bar">
+      <span id="motiv-emoji">💪</span>
+      <p id="motiv-text"></p>
+      <button id="motiv-more" onclick="toggleMotiv()" aria-label="Lire la suite">voir +</button>
+    </div>
+  </div>
+
+  <!-- SÉLECTION SÉRIE -->
+  <section id="serie-section">
+    <h2 class="text-sm font-semibold t-faint tracking-widest uppercase mb-5 text-center">Quelle est ta série ?</h2>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12" id="serie-cards"></div>
   </section>
 
-  <!-- ─── FORMULAIRE DE NOTES (caché au départ) ─────────────────── -->
+  <!-- FORMULAIRE -->
   <section id="form-section" class="hidden">
 
-    <!-- En-tête du formulaire -->
+    <!-- En-tête formulaire -->
     <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
       <div>
-        <h2 class="text-xl font-bold text-slate-800" id="form-title"></h2>
-        <p class="text-sm text-slate-400 mt-0.5">Saisis tes notes entre 0 et 20</p>
+        <h2 class="text-xl font-bold t-primary" id="form-title"></h2>
+        <p class="text-sm t-muted mt-0.5">Saisis tes notes entre 0 et 20</p>
       </div>
-      <!-- Bouton changer de série -->
-      <button onclick="resetSerie()"
-        class="btn-reset flex items-center gap-1.5 text-sm font-medium text-slate-500 bg-slate-100 border border-slate-200 px-4 py-2 rounded-lg">
-        <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0L4.586 11H17a1 1 0 110 2H4.586l3.707 3.707a1 1 0 01-1.414 1.414l-5.414-5.414a1 1 0 010-1.414l5.414-5.414a1 1 0 011.414 1.414L4.586 9H17a1 1 0 110 2H4.586l3.707 3.707z" clip-rule="evenodd" style="display:none"/></svg>
-        <!-- Icône "retour" simple -->
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+      <button onclick="resetSerie()" class="btn-sec flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-xl">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+        </svg>
         Changer de série
       </button>
     </div>
 
-    <!-- Barre de progression des notes remplies -->
-    <div class="bg-white rounded-2xl shadow-card p-5 mb-5 border border-slate-100">
-      <div class="flex justify-between items-center text-xs font-medium text-slate-400 mb-2">
-        <span>Progression des notes saisies</span>
-        <span id="progress-label">0 / 0 matières</span>
+    <!-- Barre de progression -->
+    <div class="card p-5 mb-5">
+      <div class="flex justify-between text-xs font-medium t-muted mb-2">
+        <span>Progression</span>
+        <span id="prog-label">0 / 0 matières</span>
       </div>
-      <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
-        <div id="progress-bar" class="progress-bar-fill h-full rounded-full w-0"></div>
-      </div>
+      <div class="prog-track"><div id="prog-bar" class="prog-fill w-0"></div></div>
     </div>
 
-    <!-- Tableau des matières -->
-    <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden mb-6">
-      <div class="hidden sm:grid grid-cols-12 gap-2 px-5 py-3 bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-400 uppercase tracking-wide">
+    <!-- Tableau matières -->
+    <div class="card overflow-hidden mb-5">
+      <div class="hidden sm:grid grid-cols-12 gap-2 px-5 py-3 text-xs font-semibold t-faint uppercase tracking-wide"
+        style="background:var(--bg-sub);border-bottom:1px solid var(--border)">
         <div class="col-span-5">Matière</div>
-        <div class="col-span-2 text-center coef-label">Coeff.</div>
+        <div class="col-span-2 text-center coef-col">Coeff.</div>
         <div class="col-span-3 text-center">Note / 20</div>
         <div class="col-span-2 text-center">Points</div>
       </div>
-      <div id="matieres-list">
-        <!-- Lignes générées dynamiquement -->
-      </div>
+      <div id="matieres-list"></div>
     </div>
 
-    <!-- Total coefficient -->
-    <div class="flex justify-end mb-6">
-      <div class="text-sm text-slate-400 font-medium bg-white border border-slate-100 rounded-xl px-4 py-2 shadow-card">
-        Total coefficients : <span id="total-coef-display" class="font-bold text-slate-700">–</span>
-      </div>
+    <!-- Total coef -->
+    <div class="flex justify-end mb-5">
+      <span class="text-sm t-muted card px-4 py-2 inline-block">
+        Total coefficients : <span id="total-coef" class="font-bold t-primary">–</span>
+      </span>
     </div>
 
-    <!-- Bouton Calculer -->
+    <!-- ─── BLOC NOTE MANQUANTE ──────────────────────────────────────── -->
+    <div id="missing-block" class="hidden p-5 mb-6">
+      <div class="flex items-center gap-2 mb-2">
+        <svg class="w-5 h-5 shrink-0" style="color:#f59e0b" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M12 21v-1M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        <h3 id="miss-title" class="text-sm font-bold" style="color:#92400e"></h3>
+      </div>
+      <p id="miss-subtitle" class="text-xs t-muted mb-3"></p>
+      <div id="miss-rows"></div>
+    </div>
+
+    <!-- Boutons action -->
     <div class="flex flex-col sm:flex-row gap-3 mb-10">
-      <button id="btn-calcul" onclick="calculerResultat()"
-        class="btn-calcul flex-1 text-white font-bold text-base py-4 px-8 rounded-2xl flex items-center justify-center gap-2">
+      <button onclick="calculerResultat()"
+        class="btn-main flex-1 font-bold text-base py-4 px-8 rounded-2xl flex items-center justify-center gap-2">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z"/>
         </svg>
         Calculer mon résultat
       </button>
-      <button onclick="resetNotes()"
-        class="btn-reset text-slate-500 font-medium text-sm py-4 px-6 rounded-2xl bg-slate-100 border border-slate-200">
+      <button onclick="resetNotes()" class="btn-sec font-medium text-sm py-4 px-6 rounded-2xl">
         Effacer les notes
       </button>
     </div>
 
-    <!-- ─── RÉSULTAT (caché au départ) ──────────────────────────── -->
+    <!-- ─── RÉSULTAT ─────────────────────────────────────────────────── -->
     <section id="result-section" class="hidden">
-      <!-- Carte résultat principale -->
-      <div id="result-card" class="rounded-2xl p-7 mb-5 text-white animate-fade-slide-up shadow-card-lg">
+
+      <!-- Carte verdict -->
+      <div id="result-card" class="rounded-2xl p-7 mb-5 shadow-lg anim-up">
         <div class="flex flex-col sm:flex-row items-center justify-between gap-5">
           <div class="text-center sm:text-left">
             <p class="text-sm font-medium opacity-80 mb-1">Moyenne Générale</p>
-            <div class="text-6xl sm:text-7xl font-extrabold tracking-tight animate-count-up" id="avg-display">–</div>
+            <div class="text-6xl sm:text-7xl font-extrabold tracking-tight anim-count" id="avg-display">–</div>
             <p class="text-sm opacity-70 mt-1">/ 20</p>
           </div>
           <div class="flex flex-col items-center gap-3">
             <div id="verdict-badge"
-              class="text-2xl sm:text-3xl font-extrabold px-8 py-3 rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30">
+              class="text-2xl sm:text-3xl font-extrabold px-8 py-3 rounded-2xl bg-white/20 border border-white/30">
             </div>
-            <div id="mention-badge-container"></div>
+            <div id="mention-container"></div>
           </div>
         </div>
       </div>
 
-      <!-- Détail des points -->
-      <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5 mb-5 animate-fade-in">
-        <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-widest mb-4">Détail du calcul</h3>
+      <!-- ─── RECOMMANDATIONS SECOND TOUR (affiché si verdict = second tour) ── -->
+      <div id="reco-second" class="hidden p-5 mb-5">
+        <div class="flex items-center gap-2 mb-1">
+          <svg class="w-5 h-5 shrink-0" style="color:#f59e0b" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+          </svg>
+          <h3 class="text-base font-bold" style="color:#92400e">Stratégie Second Tour 🎯</h3>
+        </div>
+        <p class="text-xs t-muted mb-4">Tu passes en Second Tour. Concentre-toi sur ces matières pour maximiser tes chances. Les matières avec le plus grand coefficient ont la priorité absolue.</p>
+        <div id="reco-rows"></div>
+        <div class="mt-4 p-3 rounded-xl text-xs" style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2)">
+          <strong style="color:#b45309">💡 Conseil :</strong>
+          <span class="t-muted"> Au second tour, chaque point dans une matière à fort coefficient peut faire basculer ta moyenne. Révise d'abord les matières marquées <strong>URGENT</strong>, puis les autres dans l'ordre affiché.</span>
+        </div>
+      </div>
+
+      <!-- Détail calcul -->
+      <div class="card p-5 mb-5 anim-in">
+        <h3 class="text-xs font-semibold t-faint uppercase tracking-widest mb-4">Détail du calcul</h3>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div class="bg-slate-50 rounded-xl p-4 text-center border border-slate-100">
-            <div class="text-xs text-slate-400 mb-1">Total des points</div>
-            <div class="text-2xl font-bold text-royal" id="total-points-display">–</div>
+          <div class="sub p-4 text-center">
+            <div class="text-xs t-muted mb-1">Total points</div>
+            <div class="text-2xl font-bold" style="color:#1e40af" id="d-pts">–</div>
           </div>
-          <div class="bg-slate-50 rounded-xl p-4 text-center border border-slate-100">
-            <div class="text-xs text-slate-400 mb-1">Total coefficients</div>
-            <div class="text-2xl font-bold text-slate-700" id="total-coef-result">–</div>
+          <div class="sub p-4 text-center">
+            <div class="text-xs t-muted mb-1">Total coefs</div>
+            <div class="text-2xl font-bold t-primary" id="d-coef">–</div>
           </div>
-          <div class="bg-slate-50 rounded-xl p-4 text-center border border-slate-100">
-            <div class="text-xs text-slate-400 mb-1">Moyenne (pts ÷ coef)</div>
-            <div class="text-2xl font-bold text-mint" id="avg-calc-display">–</div>
+          <div class="sub p-4 text-center">
+            <div class="text-xs t-muted mb-1">Moyenne exacte</div>
+            <div class="text-2xl font-bold" style="color:#10b981" id="d-moy">–</div>
           </div>
         </div>
       </div>
 
-      <!-- Récapitulatif par matière -->
-      <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden animate-fade-in">
-        <div class="px-5 py-4 border-b border-slate-100">
-          <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-widest">Récapitulatif par matière</h3>
+      <!-- ─── GRAPHIQUE RADAR ─────────────────────────────────────────── -->
+      <div class="card p-5 mb-5 anim-in">
+        <h3 class="text-xs font-semibold t-faint uppercase tracking-widest mb-1">Profil de notes</h3>
+        <p class="text-xs t-muted mb-4">Visualise tes points forts et faibles par matière</p>
+        <div id="radar-wrap" style="max-width:480px;margin:0 auto">
+          <canvas id="radar-canvas" height="340"></canvas>
         </div>
-        <div id="recap-list" class="divide-y divide-slate-50"></div>
+      </div>
+
+      <!-- Récapitulatif -->
+      <div class="card overflow-hidden anim-in">
+        <div class="px-5 py-4" style="border-bottom:1px solid var(--border)">
+          <h3 class="text-xs font-semibold t-faint uppercase tracking-widest">Récapitulatif par matière</h3>
+        </div>
+        <div id="recap-list"></div>
       </div>
 
       <!-- Nouvelle simulation -->
       <div class="mt-8 text-center">
         <button onclick="resetAll()"
-          class="btn-calcul inline-flex items-center gap-2 text-white font-semibold px-8 py-3.5 rounded-2xl text-sm">
+          class="btn-main inline-flex items-center gap-2 font-semibold px-8 py-3.5 rounded-2xl text-sm">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
           </svg>
           Nouvelle simulation
         </button>
       </div>
-    </section>
 
+    </section><!-- /result-section -->
   </section><!-- /form-section -->
-
 </main>
 
-<!-- ─── FOOTER ─────────────────────────────────────────────────────── -->
-<footer class="text-center py-10 text-xs text-slate-400">
-  Fait avec ❤️ pour les élèves du <span class="font-semibold">Lycée de PK12</span> · Djibouti ·
-  <span class="text-mint font-medium">BacSimul</span>
+<!-- FOOTER -->
+<footer class="text-center py-10 text-xs t-faint">
+  Fait avec ❤️ pour les élèves du <span class="font-semibold t-muted">Lycée de PK12</span> · Djibouti ·
+  <span style="color:#10b981" class="font-medium">BacSimul</span> v2
 </footer>
 
 
@@ -405,448 +629,695 @@
      JAVASCRIPT
 ══════════════════════════════════════════════════════════════════ -->
 <script>
-
-/* ══════════════════════════════════════════════════════════════════
-   BASE DE DONNÉES DES COEFFICIENTS — Baccalauréat général de Djibouti
-══════════════════════════════════════════════════════════════════ */
-const configurationsBac = {
-  "S": {
-    nom: "Série Scientifique (S)",
-    icon: "🔬",
-    accentClass: "border-royal text-royal bg-blue-50",
-    accentDot: "bg-royal",
-    matieres: [
-      { nom: "Mathématiques",                           coef: 9 },
-      { nom: "Physique-Chimie",                         coef: 8 },
-      { nom: "Sciences de la Vie et de la Terre (SVT)", coef: 8 },
-      { nom: "Arabe (LV1)",                             coef: 3 },
-      { nom: "Anglais (LV2)",                           coef: 3 },
-      { nom: "Philosophie",                             coef: 3 },
-      { nom: "Français pour les Spécialités",           coef: 3 },
-      { nom: "Français Écrit",                          coef: 2 },
-      { nom: "Français Oral",                           coef: 2 },
-      { nom: "Histoire et Géographie",                  coef: 2 },
-      { nom: "Éducation Physique et Sportive (EPS)",    coef: 2 },
+/* ─────────────────────────────────────────────────────────────────
+   BASE DE DONNÉES COEFFICIENTS — Baccalauréat général de Djibouti
+───────────────────────────────────────────────────────────────── */
+const BAC = {
+  S: {
+    nom:"Série Scientifique (S)", icon:"🔬",
+    acc:"border-blue-500 text-blue-700 bg-blue-50", dot:"bg-blue-500",
+    matieres:[
+      {nom:"Mathématiques",                           coef:9},
+      {nom:"Physique-Chimie",                         coef:8},
+      {nom:"Sciences de la Vie et de la Terre (SVT)", coef:8},
+      {nom:"Arabe (LV1)",                             coef:3},
+      {nom:"Anglais (LV2)",                           coef:3},
+      {nom:"Philosophie",                             coef:3},
+      {nom:"Français pour les Spécialités",           coef:3},
+      {nom:"Français Écrit",                          coef:2},
+      {nom:"Français Oral",                           coef:2},
+      {nom:"Histoire et Géographie",                  coef:2},
+      {nom:"Éducation Physique et Sportive (EPS)",    coef:2},
     ]
   },
-  "ES": {
-    nom: "Série Sciences Économiques et Sociales (ES)",
-    icon: "📈",
-    accentClass: "border-emerald-500 text-emerald-600 bg-emerald-50",
-    accentDot: "bg-mint",
-    matieres: [
-      { nom: "Sciences Économiques et Sociales",        coef: 9 },
-      { nom: "Histoire et Géographie",                  coef: 6 },
-      { nom: "Mathématiques",                           coef: 6 },
-      { nom: "Philosophie",                             coef: 5 },
-      { nom: "Arabe (LV1)",                             coef: 4 },
-      { nom: "Anglais (LV2)",                           coef: 4 },
-      { nom: "Français pour les Spécialités",           coef: 3 },
-      { nom: "Français Écrit",                          coef: 2 },
-      { nom: "Français Oral",                           coef: 2 },
-      { nom: "Éducation Physique et Sportive (EPS)",    coef: 2 },
+  ES: {
+    nom:"Série Sciences Économiques et Sociales (ES)", icon:"📈",
+    acc:"border-emerald-500 text-emerald-700 bg-emerald-50", dot:"bg-emerald-500",
+    matieres:[
+      {nom:"Sciences Économiques et Sociales",        coef:9},
+      {nom:"Histoire et Géographie",                  coef:6},
+      {nom:"Mathématiques",                           coef:6},
+      {nom:"Philosophie",                             coef:5},
+      {nom:"Arabe (LV1)",                             coef:4},
+      {nom:"Anglais (LV2)",                           coef:4},
+      {nom:"Français pour les Spécialités",           coef:3},
+      {nom:"Français Écrit",                          coef:2},
+      {nom:"Français Oral",                           coef:2},
+      {nom:"Éducation Physique et Sportive (EPS)",    coef:2},
     ]
   },
-  "SG": {
-    nom: "Série Sciences de Gestion (SG)",
-    icon: "💼",
-    accentClass: "border-amber-500 text-amber-600 bg-amber-50",
-    accentDot: "bg-amber-400",
-    matieres: [
-      { nom: "Épreuve de Spécialité",                   coef: 11 },
-      { nom: "Économie Droit",                          coef: 6 },
-      { nom: "Arabe (LV1)",                             coef: 4 },
-      { nom: "Anglais (LV2)",                           coef: 4 },
-      { nom: "Management des Organisations",            coef: 4 },
-      { nom: "Mathématiques",                           coef: 3 },
-      { nom: "Français pour les Spécialités",           coef: 3 },
-      { nom: "Français Écrit",                          coef: 2 },
-      { nom: "Français Oral",                           coef: 2 },
-      { nom: "Histoire et Géographie",                  coef: 2 },
-      { nom: "Philosophie",                             coef: 2 },
-      { nom: "Éducation Physique et Sportive (EPS)",    coef: 2 },
+  SG: {
+    nom:"Série Sciences de Gestion (SG)", icon:"💼",
+    acc:"border-amber-500 text-amber-700 bg-amber-50", dot:"bg-amber-400",
+    matieres:[
+      {nom:"Épreuve de Spécialité",                   coef:11},
+      {nom:"Économie Droit",                          coef:6},
+      {nom:"Arabe (LV1)",                             coef:4},
+      {nom:"Anglais (LV2)",                           coef:4},
+      {nom:"Management des Organisations",            coef:4},
+      {nom:"Mathématiques",                           coef:3},
+      {nom:"Français pour les Spécialités",           coef:3},
+      {nom:"Français Écrit",                          coef:2},
+      {nom:"Français Oral",                           coef:2},
+      {nom:"Histoire et Géographie",                  coef:2},
+      {nom:"Philosophie",                             coef:2},
+      {nom:"Éducation Physique et Sportive (EPS)",    coef:2},
     ]
   },
-  "L": {
-    nom: "Série Littéraire (L)",
-    icon: "📚",
-    accentClass: "border-rose-400 text-rose-600 bg-rose-50",
-    accentDot: "bg-rose-400",
-    matieres: [
-      { nom: "Philosophie",                             coef: 7 },
-      { nom: "Arabe (LV1)",                             coef: 7 },
-      { nom: "Anglais (LV2)",                           coef: 6 },
-      { nom: "Français pour les Spécialités",           coef: 4 },
-      { nom: "Histoire et Géographie",                  coef: 4 },
-      { nom: "Français Écrit",                          coef: 3 },
-      { nom: "Français Oral",                           coef: 3 },
-      { nom: "Mathématiques",                           coef: 3 },
-      { nom: "Éducation Physique et Sportive (EPS)",    coef: 2 },
+  L: {
+    nom:"Série Littéraire (L)", icon:"📚",
+    acc:"border-rose-400 text-rose-700 bg-rose-50", dot:"bg-rose-400",
+    matieres:[
+      {nom:"Philosophie",                             coef:7},
+      {nom:"Arabe (LV1)",                             coef:7},
+      {nom:"Anglais (LV2)",                           coef:6},
+      {nom:"Français pour les Spécialités",           coef:4},
+      {nom:"Histoire et Géographie",                  coef:4},
+      {nom:"Français Écrit",                          coef:3},
+      {nom:"Français Oral",                           coef:3},
+      {nom:"Mathématiques",                           coef:3},
+      {nom:"Éducation Physique et Sportive (EPS)",    coef:2},
     ]
   }
 };
 
+/* ─────────────────────────────────────────────────────────────────
+   ÉTAT
+───────────────────────────────────────────────────────────────── */
+let serie     = null;   // clé active ("S", "ES", …)
+let notes     = {};     // { idx: valeur }
+let radarInst = null;   // instance Chart.js
+
 
 /* ══════════════════════════════════════════════════════════════════
-   ÉTAT DE L'APPLICATION
+   1. MODE SOMBRE
 ══════════════════════════════════════════════════════════════════ */
-let serieActive = null;   // clé de la série sélectionnée ("S", "ES", etc.)
-let notes       = {};     // { index: valeurNote }
+function toggleDark() {
+  const dark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('bs-theme', dark ? 'dark' : 'light');
+  if (radarInst) rafraichirRadar();
+}
+
+function initTheme() {
+  const stored = localStorage.getItem('bs-theme');
+  const sys    = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (stored === 'dark' || (!stored && sys))
+    document.documentElement.classList.add('dark');
+}
 
 
 /* ══════════════════════════════════════════════════════════════════
-   INITIALISATION : Génération des cartes de série
+   2. GÉNÉRATION CARTES SÉRIE
 ══════════════════════════════════════════════════════════════════ */
-function initSerieCards() {
-  const container = document.getElementById('serie-cards');
-  container.innerHTML = '';
-
-  const serieKeys = ['S', 'ES', 'SG', 'L'];
-  const staggerClasses = ['stagger-1','stagger-2','stagger-3','stagger-4'];
-
-  serieKeys.forEach((key, i) => {
-    const config = configurationsBac[key];
-    const nbMatieres = config.matieres.length;
-    const totalCoef  = config.matieres.reduce((s, m) => s + m.coef, 0);
-
-    const card = document.createElement('div');
-    card.className = `serie-card rounded-2xl shadow-card p-5 flex flex-col gap-3 animate-fade-slide-up ${staggerClasses[i]}`;
-    card.setAttribute('role', 'button');
-    card.setAttribute('tabindex', '0');
-    card.setAttribute('aria-label', `Sélectionner ${config.nom}`);
-    card.onclick = () => selectionnerSerie(key);
-    card.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') selectionnerSerie(key); };
-
-    card.innerHTML = `
-      <div class="text-3xl" aria-hidden="true">${config.icon}</div>
+function initCartes() {
+  const c = document.getElementById('serie-cards');
+  c.innerHTML = '';
+  ['S','ES','SG','L'].forEach((k, i) => {
+    const cfg = BAC[k];
+    const tc  = cfg.matieres.reduce((s,m) => s + m.coef, 0);
+    const el  = document.createElement('div');
+    el.className = `serie-card shadow-sm p-5 flex flex-col gap-3 anim-up s${i+1}`;
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.onclick = () => chargerSerie(k);
+    el.onkeydown = e => { if(e.key==='Enter'||e.key===' ') chargerSerie(k); };
+    el.innerHTML = `
+      <div class="text-3xl" aria-hidden="true">${cfg.icon}</div>
       <div>
-        <span class="inline-block text-xs font-bold tracking-widest uppercase px-2 py-0.5 rounded-md ${config.accentClass} mb-1">${key}</span>
-        <p class="text-sm font-semibold text-slate-700 leading-snug">${config.nom.replace(`Série `, '').replace(` (${key})`, '')}</p>
+        <span class="inline-block text-xs font-bold tracking-widest uppercase px-2 py-0.5 rounded-md mb-1 ${cfg.acc}">${k}</span>
+        <p class="text-sm font-semibold t-primary leading-snug mt-1">${cfg.nom.replace('Série ','').replace(` (${k})`,'')} </p>
       </div>
-      <div class="mt-auto flex flex-wrap gap-2 text-xs text-slate-400">
-        <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full ${config.accentDot} inline-block"></span>${nbMatieres} matières</span>
-        <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-slate-300 inline-block"></span>Coef. total : ${totalCoef}</span>
-      </div>
-    `;
-    container.appendChild(card);
+      <div class="mt-auto flex flex-wrap gap-2 text-xs t-faint">
+        <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full inline-block ${cfg.dot}"></span>${cfg.matieres.length} matières</span>
+        <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full inline-block" style="background:var(--tx-faint)"></span>Coef. total : ${tc}</span>
+      </div>`;
+    c.appendChild(el);
   });
 }
 
 
 /* ══════════════════════════════════════════════════════════════════
-   SÉLECTION D'UNE SÉRIE → Affichage du formulaire
+   3. CHARGEMENT D'UNE SÉRIE
 ══════════════════════════════════════════════════════════════════ */
-function selectionnerSerie(key) {
-  serieActive = key;
-  notes       = {};
+function chargerSerie(k) {
+  serie = k; notes = {};
+  if (radarInst) { radarInst.destroy(); radarInst = null; }
 
-  const config = configurationsBac[key];
+  const cfg = BAC[k];
+  document.getElementById('form-title').textContent = cfg.nom;
+  document.getElementById('total-coef').textContent = cfg.matieres.reduce((s,m)=>s+m.coef,0);
 
-  // Mettre à jour le titre
-  document.getElementById('form-title').textContent = config.nom;
-
-  // Calculer le total des coefficients
-  const totalCoef = config.matieres.reduce((s, m) => s + m.coef, 0);
-  document.getElementById('total-coef-display').textContent = totalCoef;
-
-  // Générer la liste des matières
-  const listContainer = document.getElementById('matieres-list');
-  listContainer.innerHTML = '';
-
-  config.matieres.forEach((matiere, idx) => {
+  /* Générer les lignes */
+  const list = document.getElementById('matieres-list');
+  list.innerHTML = '';
+  cfg.matieres.forEach((m, idx) => {
     const row = document.createElement('div');
-    row.className = `matiere-row grid grid-cols-12 gap-2 items-center px-5 py-3.5 border-b border-slate-50 last:border-b-0`;
+    row.className = 'mat-row grid grid-cols-12 gap-2 items-center px-5 py-3.5';
+    row.style.borderBottom = '1px solid var(--border-soft)';
     row.innerHTML = `
-      <!-- Nom de la matière -->
       <div class="col-span-12 sm:col-span-5 flex flex-col sm:flex-row sm:items-center gap-1">
-        <span class="text-sm font-medium text-slate-700">${matiere.nom}</span>
-        <!-- Badge coef visible sur mobile -->
-        <span class="sm:hidden coef-badge inline-flex items-center text-xs text-slate-400 font-medium gap-0.5">
-          <span class="text-slate-300">•</span> Coef. ${matiere.coef}
-        </span>
+        <span class="text-sm font-medium t-primary">${m.nom}</span>
+        <span class="sm:hidden text-xs t-faint">• Coef. ${m.coef}</span>
       </div>
-
-      <!-- Coefficient (desktop) -->
       <div class="hidden sm:flex col-span-2 justify-center">
-        <span class="coef-label inline-flex items-center justify-center w-8 h-8 rounded-lg bg-royal text-white text-xs font-bold shadow-sm">${matiere.coef}</span>
+        <span class="coef-col inline-flex items-center justify-center w-8 h-8 rounded-lg text-white text-xs font-bold" style="background:#1e40af">${m.coef}</span>
       </div>
-
-      <!-- Input note -->
       <div class="col-span-8 sm:col-span-3 flex justify-center">
-        <input
-          id="note-${idx}"
-          type="number"
-          min="0" max="20" step="0.25"
-          placeholder="–"
-          class="note-input w-24 text-center rounded-xl py-2 px-3 text-sm font-semibold font-mono bg-slate-50"
-          oninput="handleNoteInput(${idx}, this)"
-          aria-label="Note de ${matiere.nom}"
-        />
+        <input id="n-${idx}" type="number" min="0" max="20" step="0.25" placeholder="–"
+          class="note-input w-24 text-center rounded-xl py-2 px-3 text-sm font-semibold font-mono"
+          oninput="saisieNote(${idx},this)" aria-label="Note de ${m.nom}" />
       </div>
-
-      <!-- Points calculés en temps réel -->
-      <div class="col-span-4 sm:col-span-2 flex justify-center items-center">
-        <span id="points-${idx}" class="text-sm font-bold font-mono text-slate-300">–</span>
-      </div>
-    `;
-    listContainer.appendChild(row);
+      <div class="col-span-4 sm:col-span-2 flex justify-center">
+        <span id="p-${idx}" class="text-sm font-bold font-mono t-faint">–</span>
+      </div>`;
+    list.appendChild(row);
   });
 
-  // Réinitialiser la barre de progression
-  updateProgress();
-
-  // Cacher le résultat s'il était visible
   document.getElementById('result-section').classList.add('hidden');
-
-  // Transition : cacher la sélection, afficher le formulaire
+  document.getElementById('missing-block').classList.add('hidden');
   document.getElementById('serie-section').classList.add('hidden');
-  const formSection = document.getElementById('form-section');
-  formSection.classList.remove('hidden');
-  formSection.classList.add('animate-fade-slide-up');
-
-  // Scroller vers le formulaire
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  const fs = document.getElementById('form-section');
+  fs.classList.remove('hidden');
+  fs.classList.add('anim-up');
+  majProgression();
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
 
 /* ══════════════════════════════════════════════════════════════════
-   GESTION DE LA SAISIE D'UNE NOTE (validation temps réel)
+   4. SAISIE D'UNE NOTE — validation + recalcul manquante
 ══════════════════════════════════════════════════════════════════ */
-function handleNoteInput(idx, input) {
-  let val = parseFloat(input.value);
-  const matiere = configurationsBac[serieActive].matieres[idx];
-  const pointsEl = document.getElementById(`points-${idx}`);
+function saisieNote(idx, inp) {
+  let v = parseFloat(inp.value);
+  const m = BAC[serie].matieres[idx];
+  const pEl = document.getElementById(`p-${idx}`);
+  inp.classList.remove('ok','warn','bad');
 
-  // Supprimer les anciennes classes de validation
-  input.classList.remove('valid', 'warning', 'invalid');
-
-  // Vider si le champ est vide ou invalide
-  if (input.value === '' || isNaN(val)) {
+  if (inp.value==='' || isNaN(v)) {
     delete notes[idx];
-    pointsEl.textContent = '–';
-    pointsEl.className = 'text-sm font-bold font-mono text-slate-300';
-    updateProgress();
-    return;
+    pEl.textContent='–'; pEl.style.color='var(--tx-faint)';
+    majProgression(); majManquante(); return;
   }
 
-  // Borner entre 0 et 20
-  if (val < 0)  { val = 0;  input.value = 0; }
-  if (val > 20) { val = 20; input.value = 20; }
+  v = Math.min(20, Math.max(0, v));
+  inp.value = v;
+  notes[idx] = v;
+  pEl.textContent = (v * m.coef).toFixed(2);
 
-  // Stocker la note
-  notes[idx] = val;
+  if      (v >= 10) { inp.classList.add('ok');   pEl.style.color='#10b981'; }
+  else if (v >= 8)  { inp.classList.add('warn');  pEl.style.color='#f59e0b'; }
+  else              { inp.classList.add('bad');   pEl.style.color='#f43f5e'; }
 
-  // Validation visuelle
-  if (val >= 10) {
-    input.classList.add('valid');
-    pointsEl.textContent = (val * matiere.coef).toFixed(2);
-    pointsEl.className = 'text-sm font-bold font-mono text-mint';
-  } else if (val >= 8) {
-    input.classList.add('warning');
-    pointsEl.textContent = (val * matiere.coef).toFixed(2);
-    pointsEl.className = 'text-sm font-bold font-mono text-amber-500';
-  } else {
-    input.classList.add('invalid');
-    pointsEl.textContent = (val * matiere.coef).toFixed(2);
-    pointsEl.className = 'text-sm font-bold font-mono text-rose-400';
-  }
-
-  updateProgress();
+  majProgression();
+  majManquante();
 }
 
 
 /* ══════════════════════════════════════════════════════════════════
-   MISE À JOUR DE LA BARRE DE PROGRESSION
+   5. BARRE DE PROGRESSION
 ══════════════════════════════════════════════════════════════════ */
-function updateProgress() {
-  const total    = configurationsBac[serieActive].matieres.length;
-  const remplis  = Object.keys(notes).length;
-  const pct      = total > 0 ? (remplis / total) * 100 : 0;
-
-  document.getElementById('progress-bar').style.width = `${pct}%`;
-  document.getElementById('progress-label').textContent = `${remplis} / ${total} matières`;
+function majProgression() {
+  const tot = BAC[serie].matieres.length;
+  const rem = Object.keys(notes).length;
+  document.getElementById('prog-bar').style.width = `${(rem/tot)*100}%`;
+  document.getElementById('prog-label').textContent = `${rem} / ${tot} matières`;
 }
 
 
 /* ══════════════════════════════════════════════════════════════════
-   CALCUL DU RÉSULTAT — Règles officielles du Bac de Djibouti
+   6. NOTE MANQUANTE REQUISE
+   Formule :
+     • totalCoef = somme de TOUS les coefficients de la série
+     • ptsAcquis = Σ(note_i × coef_i) pour matières saisies
+     • coefRestant = Σ coef des matières NON saisies
+     • ptsNécessaires = 10 × totalCoef  (seuil admis)
+     • noteRequise = (ptsNécessaires − ptsAcquis) / coefRestant
+══════════════════════════════════════════════════════════════════ */
+function majManquante() {
+  const mats = BAC[serie].matieres;
+  const manq = mats.map((m,i)=>({...m,i})).filter(m=>notes[m.i]===undefined);
+  const bloc = document.getElementById('missing-block');
+
+  /* N'afficher que si au moins 1 note saisie ET au moins 1 vide */
+  if (manq.length===0 || Object.keys(notes).length===0) {
+    bloc.classList.add('hidden'); return;
+  }
+
+  const tc   = mats.reduce((s,m)=>s+m.coef, 0);
+  const acq  = Object.entries(notes).reduce((s,[i,n])=>s+n*mats[i].coef, 0);
+  const cr   = manq.reduce((s,m)=>s+m.coef, 0);
+  const ptsN = 10 * tc;
+  const diff = ptsN - acq;
+
+  const titEl = document.getElementById('miss-title');
+  const subEl = document.getElementById('miss-subtitle');
+  const rowEl = document.getElementById('miss-rows');
+
+  if (diff <= 0) {
+    /* Déjà admis même avec 0 partout */
+    titEl.textContent = '🎉 Admis(e) assuré(e) !';
+    titEl.style.color = '#059669';
+    subEl.textContent = 'Même avec 0 dans les matières restantes, ta moyenne sera supérieure à 10.';
+    rowEl.innerHTML   = '';
+  } else {
+    const req = diff / cr;
+    if (req > 20) {
+      titEl.textContent = "⚠️ Objectif 10/20 hors d'atteinte";
+      titEl.style.color = '#dc2626';
+      subEl.textContent = `Même avec 20 partout dans les ${manq.length} matière(s) restante(s), la moyenne de 10 ne peut pas être atteinte avec tes notes actuelles.`;
+      rowEl.innerHTML   = '';
+    } else {
+      const col = req >= 10 ? '#10b981' : req >= 8 ? '#f59e0b' : '#f43f5e';
+      titEl.textContent = 'Notes requises pour être admis(e)';
+      titEl.style.color = '#92400e';
+      subEl.textContent = `Il te faut en moyenne ${req.toFixed(2)}/20 dans les ${manq.length} matière(s) non saisie(s) :`;
+      rowEl.innerHTML   = manq.map(m => `
+        <div class="miss-row flex items-center justify-between">
+          <div>
+            <span class="text-sm font-medium t-primary">${m.nom}</span>
+            <span class="text-xs t-muted ml-2">Coef. ${m.coef}</span>
+          </div>
+          <span class="text-sm font-bold font-mono" style="color:${col}">≥ ${req.toFixed(2)} / 20</span>
+        </div>`).join('');
+    }
+  }
+  bloc.classList.remove('hidden');
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   7. CALCUL DU RÉSULTAT FINAL
 ══════════════════════════════════════════════════════════════════ */
 function calculerResultat() {
-  const config = configurationsBac[serieActive];
-
-  // Vérification : au moins une note saisie
-  if (Object.keys(notes).length === 0) {
-    alert('Veuillez saisir au moins une note avant de calculer.');
+  if (Object.keys(notes).length===0) {
+    alert('Saisis au moins une note avant de calculer.');
     return;
   }
 
-  // ── Calcul ──────────────────────────────────────────────────────
-  let totalPoints = 0;
-  let totalCoef   = 0;
+  const mats = BAC[serie].matieres;
+  let ptsTot=0, coefTot=0;
 
-  const details = config.matieres.map((matiere, idx) => {
-    const note   = notes[idx] !== undefined ? notes[idx] : null;
-    const points = note !== null ? note * matiere.coef : null;
-
-    if (note !== null) {
-      totalPoints += points;
-      totalCoef   += matiere.coef;
-    }
-
-    return { ...matiere, note, points };
+  const detail = mats.map((m,idx) => {
+    const n = notes[idx]!==undefined ? notes[idx] : null;
+    const p = n!==null ? n*m.coef : null;
+    if(n!==null){ptsTot+=p; coefTot+=m.coef;}
+    return {...m, n, p};
   });
 
-  // Si aucun coef accumulé (impossible ici mais sécurité)
-  if (totalCoef === 0) return;
+  if(coefTot===0) return;
+  const moy = ptsTot / coefTot;
 
-  const moyenne = totalPoints / totalCoef;
-
-  // ── Verdict ─────────────────────────────────────────────────────
-  let verdict, verdictClass, mentionHTML = '';
-
-  if (moyenne >= 10) {
-    verdict      = 'ADMIS(E)';
-    verdictClass = 'result-admis pulse-admis';
-
-    // Mention
-    let mentionLabel, mentionClass;
-    if (moyenne >= 16) {
-      mentionLabel = '🏅 Mention Très Bien';
-      mentionClass = 'mention-tb';
-    } else if (moyenne >= 14) {
-      mentionLabel = '🥇 Mention Bien';
-      mentionClass = 'mention-b';
-    } else if (moyenne >= 12) {
-      mentionLabel = '🥈 Mention Assez Bien';
-      mentionClass = 'mention-ab';
-    } else {
-      mentionLabel = '✔️ Mention Passable';
-      mentionClass = 'mention-p';
-    }
-    mentionHTML = `<span class="mention-badge ${mentionClass}">${mentionLabel}</span>`;
-
-  } else if (moyenne >= 8) {
-    verdict      = 'SECOND TOUR';
-    verdictClass = 'result-second';
+  /* Verdict */
+  let vc, mHTML='';
+  if(moy>=10){
+    vc='res-admis pulse-ok';
+    document.getElementById('verdict-badge').textContent='ADMIS(E)';
+    let ml,mc;
+    if     (moy>=16){ml='🏅 Mention Très Bien'; mc='mb-tb';}
+    else if(moy>=14){ml='🥇 Mention Bien';       mc='mb-b'; }
+    else if(moy>=12){ml='🥈 Mention Assez Bien'; mc='mb-ab';}
+    else             {ml='✔️ Mention Passable';  mc='mb-p'; }
+    mHTML=`<span class="mbadge ${mc}">${ml}</span>`;
+  } else if(moy>=8){
+    vc='res-second';
+    document.getElementById('verdict-badge').textContent='SECOND TOUR';
   } else {
-    verdict      = 'AJOURNÉ(E)';
-    verdictClass = 'result-ajourn';
+    vc='res-ajourn';
+    document.getElementById('verdict-badge').textContent='AJOURNÉ(E)';
   }
 
-  // ── Affichage de la carte résultat ──────────────────────────────
-  const resultCard  = document.getElementById('result-card');
-  resultCard.className = `rounded-2xl p-7 mb-5 animate-fade-slide-up shadow-card-lg ${verdictClass}`;
+  const rc=document.getElementById('result-card');
+  rc.className=`rounded-2xl p-7 mb-5 shadow-lg anim-up ${vc}`;
+  document.getElementById('avg-display').textContent   = moy.toFixed(2);
+  document.getElementById('mention-container').innerHTML = mHTML;
+  document.getElementById('d-pts').textContent  = ptsTot.toFixed(2);
+  document.getElementById('d-coef').textContent = coefTot;
+  document.getElementById('d-moy').textContent  = moy.toFixed(4);
 
-  document.getElementById('avg-display').textContent       = moyenne.toFixed(2);
-  document.getElementById('verdict-badge').textContent     = verdict;
-  document.getElementById('mention-badge-container').innerHTML = mentionHTML;
-
-  // ── Détail du calcul ────────────────────────────────────────────
-  document.getElementById('total-points-display').textContent = totalPoints.toFixed(2);
-  document.getElementById('total-coef-result').textContent    = totalCoef;
-  document.getElementById('avg-calc-display').textContent     = moyenne.toFixed(4);
-
-  // ── Récapitulatif par matière ────────────────────────────────────
-  const recapList = document.getElementById('recap-list');
-  recapList.innerHTML = '';
-
-  details.forEach(({ nom, coef, note, points }) => {
-    const row = document.createElement('div');
-    row.className = 'flex items-center justify-between px-5 py-3.5 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors';
-
-    let noteBadge, pointsBadge;
-    if (note === null) {
-      noteBadge   = `<span class="text-sm font-mono text-slate-300 italic">–</span>`;
-      pointsBadge = `<span class="text-sm font-mono text-slate-300">–</span>`;
-    } else if (note >= 10) {
-      noteBadge   = `<span class="text-sm font-mono font-bold text-mint">${note.toFixed(2)}</span>`;
-      pointsBadge = `<span class="text-sm font-mono font-bold text-mint">${points.toFixed(2)}</span>`;
-    } else if (note >= 8) {
-      noteBadge   = `<span class="text-sm font-mono font-bold text-amber-500">${note.toFixed(2)}</span>`;
-      pointsBadge = `<span class="text-sm font-mono font-bold text-amber-500">${points.toFixed(2)}</span>`;
+  /* Récapitulatif */
+  const rl=document.getElementById('recap-list');
+  rl.innerHTML='';
+  detail.forEach(({nom,coef,n,p})=>{
+    const row=document.createElement('div');
+    row.className='flex items-center justify-between px-5 py-3.5 mat-row';
+    row.style.borderBottom='1px solid var(--border-soft)';
+    let nc,pc;
+    if(n===null){
+      nc=pc=`<span class="text-sm font-mono t-faint italic">–</span>`;
     } else {
-      noteBadge   = `<span class="text-sm font-mono font-bold text-rose-400">${note.toFixed(2)}</span>`;
-      pointsBadge = `<span class="text-sm font-mono font-bold text-rose-400">${points.toFixed(2)}</span>`;
+      const col=n>=10?'#10b981':n>=8?'#f59e0b':'#f43f5e';
+      nc=`<span class="text-sm font-mono font-bold" style="color:${col}">${n.toFixed(2)}</span>`;
+      pc=`<span class="text-sm font-mono font-bold" style="color:${col}">${p.toFixed(2)}</span>`;
     }
-
-    row.innerHTML = `
+    row.innerHTML=`
       <div class="flex-1 min-w-0">
-        <p class="text-sm font-medium text-slate-700 truncate">${nom}</p>
-        <p class="text-xs text-slate-400">Coefficient ${coef}</p>
+        <p class="text-sm font-medium t-primary truncate">${nom}</p>
+        <p class="text-xs t-muted">Coefficient ${coef}</p>
       </div>
       <div class="flex items-center gap-4 shrink-0 ml-3">
-        <div class="text-center w-14">
-          <div class="text-xs text-slate-400 mb-0.5">Note</div>
-          ${noteBadge}
-        </div>
-        <div class="text-center w-16">
-          <div class="text-xs text-slate-400 mb-0.5">Points</div>
-          ${pointsBadge}
-        </div>
-      </div>
-    `;
-    recapList.appendChild(row);
+        <div class="text-center w-14"><div class="text-xs t-muted mb-0.5">Note</div>${nc}</div>
+        <div class="text-center w-16"><div class="text-xs t-muted mb-0.5">Points</div>${pc}</div>
+      </div>`;
+    rl.appendChild(row);
   });
 
-  // ── Afficher la section résultat et défiler ──────────────────────
-  const resultSection = document.getElementById('result-section');
-  resultSection.classList.remove('hidden');
+  /* Recommandations second tour */
+  if(moy >= 8 && moy < 10) {
+    afficherRecoSecondTour(detail);
+  } else {
+    document.getElementById('reco-second').classList.add('hidden');
+  }
 
-  // Petit délai pour que l'animation s'enclenche proprement
-  setTimeout(() => {
-    resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, 100);
+  /* Radar */
+  dessinerRadar(detail);
+
+  const rs=document.getElementById('result-section');
+  rs.classList.remove('hidden');
+  setTimeout(()=>rs.scrollIntoView({behavior:'smooth',block:'start'}),100);
 }
 
 
 /* ══════════════════════════════════════════════════════════════════
-   RÉINITIALISATIONS
+   8. GRAPHIQUE RADAR
 ══════════════════════════════════════════════════════════════════ */
+function couleurRadar() {
+  const dk = document.documentElement.classList.contains('dark');
+  return {
+    grid:  dk ? 'rgba(255,255,255,.10)' : 'rgba(30,64,175,.10)',
+    tick:  dk ? 'rgba(255,255,255,.35)' : 'rgba(30,64,175,.45)',
+    label: dk ? '#94a3b8' : '#475569',
+    fill:  dk ? 'rgba(16,185,129,.20)' : 'rgba(16,185,129,.15)',
+  };
+}
 
-/** Efface uniquement les notes du formulaire courant */
+function dessinerRadar(detail) {
+  if(radarInst){radarInst.destroy();radarInst=null;}
+
+  /* Ne garder que les matières avec une note */
+  const avecNote = detail.filter(d=>d.n!==null);
+  const wrap = document.getElementById('radar-wrap');
+
+  if(avecNote.length < 3){
+    wrap.innerHTML=`<p class="text-center text-sm t-muted py-6">Saisis au moins 3 notes pour afficher le radar.</p>`;
+    return;
+  }
+
+  /* Remettre le canvas si effacé */
+  if(!wrap.querySelector('canvas'))
+    wrap.innerHTML='<canvas id="radar-canvas" height="340"></canvas>';
+
+  const labels = avecNote.map(d=>d.nom.length>22?d.nom.slice(0,20)+'…':d.nom);
+  const data   = avecNote.map(d=>d.n);
+  const c      = couleurRadar();
+
+  radarInst = new Chart(
+    document.getElementById('radar-canvas').getContext('2d'),
+    {
+      type:'radar',
+      data:{
+        labels,
+        datasets:[
+          {
+            label:'Mes notes',
+            data,
+            backgroundColor: c.fill,
+            borderColor:     '#10b981',
+            borderWidth: 2.5,
+            pointBackgroundColor:'#10b981',
+            pointRadius:5, pointHoverRadius:7,
+            pointBorderColor:'#fff', pointBorderWidth:2,
+          },{
+            /* Ligne de référence seuil admis */
+            label:'Seuil admis (10)',
+            data: Array(avecNote.length).fill(10),
+            backgroundColor:'transparent',
+            borderColor:'rgba(244,63,94,.4)',
+            borderWidth:1.5, borderDash:[5,4],
+            pointRadius:0,
+          }
+        ]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:true,
+        scales:{
+          r:{
+            min:0, max:20,
+            ticks:{
+              stepSize:5, color:c.tick,
+              font:{size:10,family:'DM Mono,monospace'},
+              backdropColor:'transparent',
+            },
+            grid:{color:c.grid},
+            angleLines:{color:c.grid},
+            pointLabels:{color:c.label, font:{size:11,family:'Sora,sans-serif'}},
+          }
+        },
+        plugins:{
+          legend:{
+            labels:{
+              color:c.label,
+              font:{size:12,family:'Sora,sans-serif'},
+              usePointStyle:true, pointStyleWidth:12,
+            }
+          },
+          tooltip:{
+            callbacks:{
+              label:ctx=>`  ${ctx.dataset.label} : ${ctx.parsed.r!==undefined?Number(ctx.parsed.r).toFixed(2):''}`
+            }
+          }
+        }
+      }
+    }
+  );
+}
+
+/* Actualiser les couleurs du radar lors du toggle */
+function rafraichirRadar() {
+  if(!radarInst) return;
+  const c = couleurRadar();
+  const r = radarInst.options.scales.r;
+  r.ticks.color = c.tick;
+  r.grid.color  = r.angleLines.color = c.grid;
+  r.pointLabels.color = c.label;
+  radarInst.options.plugins.legend.labels.color = c.label;
+  radarInst.data.datasets[0].backgroundColor = c.fill;
+  radarInst.update();
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   9. RÉINITIALISATIONS
+══════════════════════════════════════════════════════════════════ */
 function resetNotes() {
-  notes = {};
-  const config = configurationsBac[serieActive];
-  config.matieres.forEach((_, idx) => {
-    const input   = document.getElementById(`note-${idx}`);
-    const pointsEl= document.getElementById(`points-${idx}`);
-    if (input) {
-      input.value = '';
-      input.classList.remove('valid', 'warning', 'invalid');
-    }
-    if (pointsEl) {
-      pointsEl.textContent = '–';
-      pointsEl.className   = 'text-sm font-bold font-mono text-slate-300';
-    }
+  notes={};
+  BAC[serie].matieres.forEach((_,i)=>{
+    const inp=document.getElementById(`n-${i}`);
+    const pts=document.getElementById(`p-${i}`);
+    if(inp){inp.value='';inp.classList.remove('ok','warn','bad');}
+    if(pts){pts.textContent='–';pts.style.color='var(--tx-faint)';}
   });
   document.getElementById('result-section').classList.add('hidden');
-  updateProgress();
+  document.getElementById('missing-block').classList.add('hidden');
+  document.getElementById('reco-second').classList.add('hidden');
+  if(radarInst){radarInst.destroy();radarInst=null;}
+  majProgression();
 }
 
-/** Retourne à la sélection de série */
 function resetSerie() {
-  serieActive = null;
-  notes       = {};
-  document.getElementById('form-section').classList.add('hidden');
-  document.getElementById('result-section').classList.add('hidden');
+  serie=null; notes={};
+  if(radarInst){radarInst.destroy();radarInst=null;}
+  ['form-section','result-section','missing-block','reco-second'].forEach(id=>
+    document.getElementById(id).classList.add('hidden'));
   document.getElementById('serie-section').classList.remove('hidden');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
-/** Réinitialisation complète (bouton "Nouvelle simulation") */
-function resetAll() {
-  resetSerie();
+function resetAll(){ resetSerie(); }
+
+
+/* ══════════════════════════════════════════════════════════════════
+   COUNTDOWN — Bac 2026 Djibouti
+   Oral : 31 mai → 4 juin 2026 | Écrit : 7 juin → 11 juin 2026
+══════════════════════════════════════════════════════════════════ */
+const PHASES = [
+  { id:'oral',  label:'Orales',  debut:new Date('2026-05-31T07:00:00'), fin:new Date('2026-06-04T18:00:00'), dates:'31 mai – 4 juin', dot:'#f59e0b' },
+  { id:'ecrit', label:'Écrites', debut:new Date('2026-06-07T07:00:00'), fin:new Date('2026-06-11T18:00:00'), dates:'7 – 11 juin',    dot:'#10b981' },
+];
+
+/*
+  Pool de messages de motivation — tirés ALÉATOIREMENT à chaque visite,
+  indépendamment du jour. L'index est stocké en sessionStorage pour ne pas
+  changer pendant la même session, mais changer à la prochaine ouverture.
+*/
+const POOL_MOTIV = [
+  { e:'🔥', t:"Le Bac ne se gagne pas le jour J — il se gagne dans les heures silencieuses d'avant. Chaque révision compte, même la plus courte." },
+  { e:'💡', t:"Revois tes erreurs passées plutôt que de relire ce que tu sais déjà. C'est là que les points se gagnent vraiment." },
+  { e:'⚡', t:"Un chapitre par jour suffit à changer la donne. Commence par la matière à fort coefficient — c'est là que l'effort rapporte le plus." },
+  { e:'🎯', t:"Pas besoin d'être le meilleur. Juste besoin d'être prêt(e). Concentre-toi, travaille régulièrement, tu vas y arriver." },
+  { e:'🌙', t:"Dors suffisamment. Un cerveau reposé retient 3× mieux qu'un cerveau épuisé. Le sommeil, c'est aussi de la révision." },
+  { e:'🚀', t:"Dans quelques semaines, tout sera derrière toi. Chaque minute investie maintenant, c'est un sourire assuré le jour des résultats." },
+  { e:'🏁', t:"Les champions s'entraînent même quand ils n'en ont pas envie. Toi aussi tu peux faire 30 minutes de plus ce soir." },
+  { e:'📖', t:"Fiche, schéma, exercice — le cerveau retient ce qu'il pratique, pas ce qu'il survole. Sois actif(ve) dans tes révisions." },
+  { e:'💪', t:"Le lycée de PK12 a vu des centaines d'élèves comme toi réussir. C'est ton tour. Tu as tout ce qu'il faut — crois-y." },
+  { e:'🌟', t:"Chaque matière difficile aujourd'hui est une matière facile le jour du Bac. Continue, l'effort d'aujourd'hui fait le résultat de demain." },
+  { e:'🧠', t:"Technique active : lis, ferme le livre, et écris ce dont tu te souviens. Ce que tu ne peux pas réécrire, tu ne le sais pas encore." },
+  { e:'☀️', t:"Peu importe où tu en es dans tes révisions — il est toujours temps de progresser. Un pas en avant vaut mieux que zéro." },
+];
+
+/* Tirer un message aléatoire une fois par session */
+function getMotivDuJour() {
+  let idx = sessionStorage.getItem('bs-motiv-idx');
+  if (idx === null) {
+    idx = Math.floor(Math.random() * POOL_MOTIV.length);
+    sessionStorage.setItem('bs-motiv-idx', idx);
+  }
+  return POOL_MOTIV[Number(idx)];
+}
+
+let motivExpanded = false;
+function toggleMotiv() {
+  motivExpanded = !motivExpanded;
+  const el = document.getElementById('motiv-text');
+  const btn = document.getElementById('motiv-more');
+  el.classList.toggle('expanded', motivExpanded);
+  btn.textContent = motivExpanded ? 'voir −' : 'voir +';
+}
+
+function getPhaseInfo(now) {
+  for(const p of PHASES){
+    if(now >= p.debut && now <= p.fin) return { phase:p, type:'encours', cible:p.fin };
+  }
+  const next = PHASES.find(p => now < p.debut);
+  if(next) return { phase:next, type:'avant', cible:next.debut };
+  return { phase:null, type:'fini', cible:null };
+}
+
+function pad2(n){ return String(Math.floor(n)).padStart(2,'0'); }
+
+function tickCountdown() {
+  const now  = new Date();
+  const info = getPhaseInfo(now);
+
+  const elJ = document.getElementById('cd-j');
+  const elH = document.getElementById('cd-h');
+  const elM = document.getElementById('cd-m');
+  const elS = document.getElementById('cd-s');
+
+  if(info.type === 'fini') {
+    [elJ,elH,elM,elS].forEach(el=>{ el.textContent='00'; el.classList.remove('urgent'); });
+    document.getElementById('phase-dot').style.background = '#10b981';
+    document.getElementById('phase-label').textContent = '✅ Bac 2026 terminé';
+    document.getElementById('phase-dates').textContent  = 'Résultats bientôt !';
+    return;
+  }
+
+  const diff   = info.cible - now;
+  const jours  = Math.floor(diff / 86400000);
+  const heures = Math.floor((diff % 86400000) / 3600000);
+  const mins   = Math.floor((diff % 3600000)  / 60000);
+  const secs   = Math.floor((diff % 60000)    / 1000);
+
+  elJ.textContent = pad2(jours);
+  elH.textContent = pad2(heures);
+  elM.textContent = pad2(mins);
+  elS.textContent = pad2(secs);
+
+  const urgent = jours < 2;
+  [elJ,elH,elM,elS].forEach(el => el.classList.toggle('urgent', urgent));
+
+  const dot = document.getElementById('phase-dot');
+  const lbl = document.getElementById('phase-label');
+  const dt  = document.getElementById('phase-dates');
+
+  if(info.type === 'encours') {
+    dot.style.background = '#f43f5e';
+    lbl.textContent = `🔴 Épreuves ${info.phase.label} en cours`;
+    dt.textContent  = `Fin ${info.phase.fin.toLocaleDateString('fr-FR',{day:'numeric',month:'long'})}`;
+  } else {
+    dot.style.background = info.phase.dot;
+    lbl.textContent = `⏳ Bac ${info.phase.label}`;
+    dt.textContent  = info.phase.dates + ' 2026';
+  }
+}
+
+function initMotiv() {
+  const msg = getMotivDuJour();
+  document.getElementById('motiv-emoji').textContent = msg.e;
+  document.getElementById('motiv-text').textContent  = msg.t;
 }
 
 
 /* ══════════════════════════════════════════════════════════════════
-   DÉMARRAGE
+   RECOMMANDATIONS SECOND TOUR
+   Affiche les matières < 10 triées par priorité (coef × écart à 10)
 ══════════════════════════════════════════════════════════════════ */
-document.addEventListener('DOMContentLoaded', () => {
-  // Générer les cartes de série au chargement
-  initSerieCards();
-});
+function afficherRecoSecondTour(detail) {
+  const bloc = document.getElementById('reco-second');
+  const rows = document.getElementById('reco-rows');
 
+  /* Matières avec note < 10 seulement */
+  const faibles = detail
+    .filter(d => d.n !== null && d.n < 10)
+    .map(d => ({
+      ...d,
+      ecart:    10 - d.n,                      // points manquants pour atteindre 10
+      priorite: (10 - d.n) * d.coef,           // score de priorité : plus c'est élevé, plus urgent
+    }))
+    .sort((a,b) => b.priorite - a.priorite);   // tri décroissant
+
+  if(faibles.length === 0){ bloc.classList.add('hidden'); return; }
+
+  const maxPrio = faibles[0].priorite;
+
+  rows.innerHTML = faibles.map(m => {
+    const pct = Math.round((m.priorite / maxPrio) * 100);
+
+    /* Étiquette de priorité */
+    let tipClass, tipLabel, conseils;
+    if(m.priorite >= maxPrio * 0.7){
+      tipClass = 'tip-urgent'; tipLabel = '🔴 URGENT';
+      conseils = `Note actuelle : ${m.n.toFixed(2)}/20 — Il te manque ${m.ecart.toFixed(2)} points. Avec un coef. ${m.coef}, chaque point ici rapporte ${m.coef} pts. Priorité absolue !`;
+    } else if(m.priorite >= maxPrio * 0.35){
+      tipClass = 'tip-fort'; tipLabel = '🟠 Important';
+      conseils = `Note actuelle : ${m.n.toFixed(2)}/20. Coef. ${m.coef} — un effort ciblé ici peut faire la différence.`;
+    } else {
+      tipClass = 'tip-ok'; tipLabel = '🟡 À surveiller';
+      conseils = `Note actuelle : ${m.n.toFixed(2)}/20. Coef. ${m.coef} — révise une fois les priorités traitées.`;
+    }
+
+    return `
+      <div class="reco-mat-row">
+        <!-- Nom + tip -->
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 flex-wrap mb-1">
+            <span class="text-sm font-semibold t-primary">${m.nom}</span>
+            <span class="reco-tip ${tipClass}">${tipLabel}</span>
+          </div>
+          <p class="text-xs t-muted leading-relaxed">${conseils}</p>
+          <!-- Barre de priorité -->
+          <div class="mt-2 h-1.5 rounded-full overflow-hidden" style="background:var(--border)">
+            <div class="priority-bar" style="width:${pct}%"></div>
+          </div>
+        </div>
+        <!-- Score -->
+        <div class="shrink-0 text-right ml-3">
+          <div class="text-xs t-faint mb-0.5">Note</div>
+          <div class="text-base font-bold font-mono" style="color:#f43f5e">${m.n.toFixed(2)}</div>
+          <div class="text-xs t-faint">/ 20</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  bloc.classList.remove('hidden');
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  initCartes();
+  initMotiv();
+  tickCountdown();
+  setInterval(tickCountdown, 1000);
+});
 </script>
 </body>
 </html>
