@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BacSimul – Simulateur de Bac | Djibouti</title>
+
+  <!-- ─── Google Fonts ───────────────────────────────────────────────── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- ─── Tailwind CSS via CDN ──────────────────────────────────────── -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Sora', 'sans-serif'],
+            mono: ['DM Mono', 'monospace'],
+          },
+          colors: {
+            royal:   { DEFAULT: '#1e40af', light: '#3b5fd6', dark: '#162d80' },
+            mint:    { DEFAULT: '#10b981', light: '#34d399', dark: '#059669' },
+            amber:   { DEFAULT: '#f59e0b' },
+            rose:    { DEFAULT: '#f43f5e' },
+            slate:   { 50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',
+                       400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',
+                       800:'#1e293b',900:'#0f172a' },
+          },
+          boxShadow: {
+            'card':    '0 4px 24px -4px rgba(30,64,175,0.13)',
+            'card-lg': '0 8px 40px -8px rgba(30,64,175,0.18)',
+            'glow-mint':'0 0 22px rgba(16,185,129,0.35)',
+            'glow-royal':'0 0 22px rgba(30,64,175,0.30)',
+          },
+          backgroundImage: {
+            'hero-mesh': `
+              radial-gradient(at 20% 10%, rgba(59,95,214,0.18) 0%, transparent 50%),
+              radial-gradient(at 80% 90%, rgba(16,185,129,0.13) 0%, transparent 50%),
+              radial-gradient(at 60% 30%, rgba(30,64,175,0.08) 0%, transparent 45%)
+            `,
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* ───────── Global reset & base ──────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Sora', sans-serif;
+      background-color: #f1f5f9;
+      background-image:
+        radial-gradient(at 10% 5%,  rgba(59,95,214,.12) 0%, transparent 45%),
+        radial-gradient(at 90% 95%, rgba(16,185,129,.10) 0%, transparent 45%),
+        radial-gradient(at 70% 25%, rgba(30,64,175,.07) 0%, transparent 40%);
+      min-height: 100vh;
+      color: #1e293b;
+    }
+
+    /* ───────── Animations ───────────────────────────────────────── */
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes pulse-ring {
+      0%   { box-shadow: 0 0 0 0 rgba(16,185,129,.45); }
+      70%  { box-shadow: 0 0 0 12px rgba(16,185,129,0); }
+      100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+    }
+    @keyframes countUp {
+      from { opacity: 0; transform: scale(0.75); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    @keyframes shimmer {
+      0%   { background-position: -400px 0; }
+      100% { background-position: 400px 0; }
+    }
+
+    .animate-fade-slide-up  { animation: fadeSlideUp  .55s cubic-bezier(.22,1,.36,1) both; }
+    .animate-fade-in        { animation: fadeIn        .4s ease both; }
+    .animate-count-up       { animation: countUp       .5s cubic-bezier(.22,1,.36,1) both; }
+
+    /* staggered delays for series cards */
+    .stagger-1 { animation-delay: .07s; }
+    .stagger-2 { animation-delay: .14s; }
+    .stagger-3 { animation-delay: .21s; }
+    .stagger-4 { animation-delay: .28s; }
+
+    /* ───────── Navbar ───────────────────────────────────────────── */
+    #navbar {
+      background: rgba(255,255,255,.82);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(30,64,175,.09);
+    }
+
+    /* ───────── Series selection cards ──────────────────────────── */
+    .serie-card {
+      cursor: pointer;
+      transition: transform .22s cubic-bezier(.22,1,.36,1),
+                  box-shadow .22s ease,
+                  border-color .2s ease;
+      border: 2px solid transparent;
+      background: white;
+    }
+    .serie-card:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 12px 40px -8px rgba(30,64,175,.22);
+      border-color: #3b5fd6;
+    }
+    .serie-card:active { transform: scale(.97); }
+
+    /* ───────── Input validation colors ─────────────────────────── */
+    .note-input {
+      transition: border-color .2s, box-shadow .2s;
+      border: 2px solid #cbd5e1;
+      outline: none;
+    }
+    .note-input:focus        { border-color: #3b5fd6; box-shadow: 0 0 0 3px rgba(59,95,214,.15); }
+    .note-input.valid        { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,.13); }
+    .note-input.warning      { border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,.13); }
+    .note-input.invalid      { border-color: #f43f5e; box-shadow: 0 0 0 3px rgba(244,63,94,.12); }
+
+    /* ───────── Result badge ─────────────────────────────────────── */
+    .result-admis    { background: linear-gradient(135deg,#059669,#10b981); color: #fff; }
+    .result-second   { background: linear-gradient(135deg,#d97706,#f59e0b); color: #fff; }
+    .result-ajourn   { background: linear-gradient(135deg,#dc2626,#f43f5e); color: #fff; }
+
+    /* pulse animation for ADMIS badge */
+    .pulse-admis { animation: pulse-ring 1.8s cubic-bezier(.4,0,.6,1) 3; }
+
+    /* ───────── Mention badge ────────────────────────────────────── */
+    .mention-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      padding: .28rem .85rem;
+      border-radius: 9999px;
+      font-size: .82rem;
+      font-weight: 600;
+      letter-spacing: .03em;
+      animation: fadeSlideUp .4s .2s both;
+    }
+    .mention-tb  { background:#d1fae5; color:#065f46; border: 1.5px solid #6ee7b7; }
+    .mention-b   { background:#dbeafe; color:#1e40af; border: 1.5px solid #93c5fd; }
+    .mention-ab  { background:#fef3c7; color:#92400e; border: 1.5px solid #fcd34d; }
+    .mention-p   { background:#f1f5f9; color:#475569; border: 1.5px solid #cbd5e1; }
+
+    /* ───────── Matiere row hover ────────────────────────────────── */
+    .matiere-row { transition: background .18s; }
+    .matiere-row:hover { background: rgba(30,64,175,.04); }
+
+    /* ───────── Bouton principal ─────────────────────────────────── */
+    .btn-calcul {
+      background: linear-gradient(135deg, #1e40af 0%, #3b5fd6 100%);
+      transition: transform .18s, box-shadow .18s, filter .18s;
+      box-shadow: 0 4px 18px -4px rgba(30,64,175,.45);
+    }
+    .btn-calcul:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px -4px rgba(30,64,175,.50);
+      filter: brightness(1.07);
+    }
+    .btn-calcul:active { transform: scale(.97); }
+
+    .btn-reset {
+      transition: background .18s, transform .18s;
+    }
+    .btn-reset:hover { background: #e2e8f0; transform: translateY(-1px); }
+
+    /* ───────── Progress bar ─────────────────────────────────────── */
+    .progress-bar-fill {
+      transition: width .8s cubic-bezier(.22,1,.36,1);
+      background: linear-gradient(90deg, #1e40af, #10b981);
+    }
+
+    /* ───────── Section scroll reveal ───────────────────────────── */
+    .section-reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity .5s ease, transform .5s cubic-bezier(.22,1,.36,1);
+    }
+    .section-reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* ───────── Responsive table helper ─────────────────────────── */
+    @media (max-width: 640px) {
+      .coef-label { display: none; }
+      .coef-badge { font-size: .72rem; }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     NAVBAR
+══════════════════════════════════════════════════════════════════ -->
+<nav id="navbar" class="fixed top-0 left-0 right-0 z-50">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+
+    <!-- Logo + Brand -->
+    <div class="flex items-center gap-3">
+      <!-- SVG Logo : mortier de diplômé + coche -->
+      <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <!-- Chapeau mortier (base) -->
+        <rect x="4" y="18" width="30" height="5" rx="2.5" fill="#1e40af"/>
+        <!-- Dessus du chapeau (losange) -->
+        <polygon points="19,5 35,16 19,21 3,16" fill="#1e40af"/>
+        <!-- Ruban / bande claire -->
+        <polygon points="19,7 33,16.5 19,19.5 5,16.5" fill="#3b5fd6"/>
+        <!-- Corde pendante -->
+        <line x1="34" y1="16" x2="34" y2="26" stroke="#1e40af" stroke-width="2.2" stroke-linecap="round"/>
+        <circle cx="34" cy="27.5" r="2" fill="#10b981"/>
+        <!-- Coche de validation -->
+        <circle cx="26" cy="30" r="6.5" fill="#10b981"/>
+        <polyline points="22.5,30 25,32.5 29.5,27.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+      <span class="font-bold text-xl tracking-tight text-royal-dark">Bac<span class="text-mint">Simul</span></span>
+    </div>
+
+    <!-- Badge pays -->
+    <span class="hidden sm:flex items-center gap-1.5 text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
+      <svg class="w-3.5 h-3.5 text-royal" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 110-12 6 6 0 010 12z" clip-rule="evenodd"/></svg>
+      Baccalauréat · Djibouti
+    </span>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     MAIN WRAPPER
+══════════════════════════════════════════════════════════════════ -->
+<main class="max-w-5xl mx-auto px-4 sm:px-6 pt-28 pb-20" id="app">
+
+  <!-- ─── HERO ─────────────────────────────────────────────────── -->
+  <section id="hero" class="text-center mb-14 animate-fade-slide-up">
+    <span class="inline-block text-xs font-semibold tracking-widest uppercase text-mint bg-emerald-50 border border-emerald-200 px-4 py-1.5 rounded-full mb-5">
+      Outil 100 % officieux – à titre indicatif
+    </span>
+    <h1 class="text-4xl sm:text-5xl font-extrabold text-slate-800 leading-tight mb-4">
+      Simule ta<br class="sm:hidden"/>
+      <span class="text-royal"> moyenne au Bac</span>
+    </h1>
+    <p class="text-slate-500 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
+      Choisis ta série, saisis tes notes et découvre instantanément ta moyenne générale, ton verdict et ta mention.
+    </p>
+  </section>
+
+  <!-- ─── SÉLECTION DE SÉRIE ────────────────────────────────────── -->
+  <section id="serie-section">
+    <h2 class="text-sm font-semibold text-slate-400 tracking-widest uppercase mb-5 text-center">
+      Quelle est ta série ?
+    </h2>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12" id="serie-cards">
+      <!-- Les cartes sont générées dynamiquement par JS -->
+    </div>
+  </section>
+
+  <!-- ─── FORMULAIRE DE NOTES (caché au départ) ─────────────────── -->
+  <section id="form-section" class="hidden">
+
+    <!-- En-tête du formulaire -->
+    <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+      <div>
+        <h2 class="text-xl font-bold text-slate-800" id="form-title"></h2>
+        <p class="text-sm text-slate-400 mt-0.5">Saisis tes notes entre 0 et 20</p>
+      </div>
+      <!-- Bouton changer de série -->
+      <button onclick="resetSerie()"
+        class="btn-reset flex items-center gap-1.5 text-sm font-medium text-slate-500 bg-slate-100 border border-slate-200 px-4 py-2 rounded-lg">
+        <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0L4.586 11H17a1 1 0 110 2H4.586l3.707 3.707a1 1 0 01-1.414 1.414l-5.414-5.414a1 1 0 010-1.414l5.414-5.414a1 1 0 011.414 1.414L4.586 9H17a1 1 0 110 2H4.586l3.707 3.707z" clip-rule="evenodd" style="display:none"/></svg>
+        <!-- Icône "retour" simple -->
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        Changer de série
+      </button>
+    </div>
+
+    <!-- Barre de progression des notes remplies -->
+    <div class="bg-white rounded-2xl shadow-card p-5 mb-5 border border-slate-100">
+      <div class="flex justify-between items-center text-xs font-medium text-slate-400 mb-2">
+        <span>Progression des notes saisies</span>
+        <span id="progress-label">0 / 0 matières</span>
+      </div>
+      <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+        <div id="progress-bar" class="progress-bar-fill h-full rounded-full w-0"></div>
+      </div>
+    </div>
+
+    <!-- Tableau des matières -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden mb-6">
+      <div class="hidden sm:grid grid-cols-12 gap-2 px-5 py-3 bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-400 uppercase tracking-wide">
+        <div class="col-span-5">Matière</div>
+        <div class="col-span-2 text-center coef-label">Coeff.</div>
+        <div class="col-span-3 text-center">Note / 20</div>
+        <div class="col-span-2 text-center">Points</div>
+      </div>
+      <div id="matieres-list">
+        <!-- Lignes générées dynamiquement -->
+      </div>
+    </div>
+
+    <!-- Total coefficient -->
+    <div class="flex justify-end mb-6">
+      <div class="text-sm text-slate-400 font-medium bg-white border border-slate-100 rounded-xl px-4 py-2 shadow-card">
+        Total coefficients : <span id="total-coef-display" class="font-bold text-slate-700">–</span>
+      </div>
+    </div>
+
+    <!-- Bouton Calculer -->
+    <div class="flex flex-col sm:flex-row gap-3 mb-10">
+      <button id="btn-calcul" onclick="calculerResultat()"
+        class="btn-calcul flex-1 text-white font-bold text-base py-4 px-8 rounded-2xl flex items-center justify-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        </svg>
+        Calculer mon résultat
+      </button>
+      <button onclick="resetNotes()"
+        class="btn-reset text-slate-500 font-medium text-sm py-4 px-6 rounded-2xl bg-slate-100 border border-slate-200">
+        Effacer les notes
+      </button>
+    </div>
+
+    <!-- ─── RÉSULTAT (caché au départ) ──────────────────────────── -->
+    <section id="result-section" class="hidden">
+      <!-- Carte résultat principale -->
+      <div id="result-card" class="rounded-2xl p-7 mb-5 text-white animate-fade-slide-up shadow-card-lg">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-5">
+          <div class="text-center sm:text-left">
+            <p class="text-sm font-medium opacity-80 mb-1">Moyenne Générale</p>
+            <div class="text-6xl sm:text-7xl font-extrabold tracking-tight animate-count-up" id="avg-display">–</div>
+            <p class="text-sm opacity-70 mt-1">/ 20</p>
+          </div>
+          <div class="flex flex-col items-center gap-3">
+            <div id="verdict-badge"
+              class="text-2xl sm:text-3xl font-extrabold px-8 py-3 rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30">
+            </div>
+            <div id="mention-badge-container"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Détail des points -->
+      <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5 mb-5 animate-fade-in">
+        <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-widest mb-4">Détail du calcul</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="bg-slate-50 rounded-xl p-4 text-center border border-slate-100">
+            <div class="text-xs text-slate-400 mb-1">Total des points</div>
+            <div class="text-2xl font-bold text-royal" id="total-points-display">–</div>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-4 text-center border border-slate-100">
+            <div class="text-xs text-slate-400 mb-1">Total coefficients</div>
+            <div class="text-2xl font-bold text-slate-700" id="total-coef-result">–</div>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-4 text-center border border-slate-100">
+            <div class="text-xs text-slate-400 mb-1">Moyenne (pts ÷ coef)</div>
+            <div class="text-2xl font-bold text-mint" id="avg-calc-display">–</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Récapitulatif par matière -->
+      <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden animate-fade-in">
+        <div class="px-5 py-4 border-b border-slate-100">
+          <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-widest">Récapitulatif par matière</h3>
+        </div>
+        <div id="recap-list" class="divide-y divide-slate-50"></div>
+      </div>
+
+      <!-- Nouvelle simulation -->
+      <div class="mt-8 text-center">
+        <button onclick="resetAll()"
+          class="btn-calcul inline-flex items-center gap-2 text-white font-semibold px-8 py-3.5 rounded-2xl text-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+          Nouvelle simulation
+        </button>
+      </div>
+    </section>
+
+  </section><!-- /form-section -->
+
+</main>
+
+<!-- ─── FOOTER ─────────────────────────────────────────────────────── -->
+<footer class="text-center py-10 text-xs text-slate-400">
+  Fait avec ❤️ pour les élèves du <span class="font-semibold">Lycée de PK12</span> · Djibouti ·
+  <span class="text-mint font-medium">BacSimul</span>
+</footer>
+
+
+<!-- ══════════════════════════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════════════════════ -->
+<script>
+
+/* ══════════════════════════════════════════════════════════════════
+   BASE DE DONNÉES DES COEFFICIENTS — Baccalauréat général de Djibouti
+══════════════════════════════════════════════════════════════════ */
+const configurationsBac = {
+  "S": {
+    nom: "Série Scientifique (S)",
+    icon: "🔬",
+    accentClass: "border-royal text-royal bg-blue-50",
+    accentDot: "bg-royal",
+    matieres: [
+      { nom: "Mathématiques",                           coef: 9 },
+      { nom: "Physique-Chimie",                         coef: 8 },
+      { nom: "Sciences de la Vie et de la Terre (SVT)", coef: 8 },
+      { nom: "Arabe (LV1)",                             coef: 3 },
+      { nom: "Anglais (LV2)",                           coef: 3 },
+      { nom: "Philosophie",                             coef: 3 },
+      { nom: "Français pour les Spécialités",           coef: 3 },
+      { nom: "Français Écrit",                          coef: 2 },
+      { nom: "Français Oral",                           coef: 2 },
+      { nom: "Histoire et Géographie",                  coef: 2 },
+      { nom: "Éducation Physique et Sportive (EPS)",    coef: 2 },
+    ]
+  },
+  "ES": {
+    nom: "Série Sciences Économiques et Sociales (ES)",
+    icon: "📈",
+    accentClass: "border-emerald-500 text-emerald-600 bg-emerald-50",
+    accentDot: "bg-mint",
+    matieres: [
+      { nom: "Sciences Économiques et Sociales",        coef: 9 },
+      { nom: "Histoire et Géographie",                  coef: 6 },
+      { nom: "Mathématiques",                           coef: 6 },
+      { nom: "Philosophie",                             coef: 5 },
+      { nom: "Arabe (LV1)",                             coef: 4 },
+      { nom: "Anglais (LV2)",                           coef: 4 },
+      { nom: "Français pour les Spécialités",           coef: 3 },
+      { nom: "Français Écrit",                          coef: 2 },
+      { nom: "Français Oral",                           coef: 2 },
+      { nom: "Éducation Physique et Sportive (EPS)",    coef: 2 },
+    ]
+  },
+  "SG": {
+    nom: "Série Sciences de Gestion (SG)",
+    icon: "💼",
+    accentClass: "border-amber-500 text-amber-600 bg-amber-50",
+    accentDot: "bg-amber-400",
+    matieres: [
+      { nom: "Épreuve de Spécialité",                   coef: 11 },
+      { nom: "Économie Droit",                          coef: 6 },
+      { nom: "Arabe (LV1)",                             coef: 4 },
+      { nom: "Anglais (LV2)",                           coef: 4 },
+      { nom: "Management des Organisations",            coef: 4 },
+      { nom: "Mathématiques",                           coef: 3 },
+      { nom: "Français pour les Spécialités",           coef: 3 },
+      { nom: "Français Écrit",                          coef: 2 },
+      { nom: "Français Oral",                           coef: 2 },
+      { nom: "Histoire et Géographie",                  coef: 2 },
+      { nom: "Philosophie",                             coef: 2 },
+      { nom: "Éducation Physique et Sportive (EPS)",    coef: 2 },
+    ]
+  },
+  "L": {
+    nom: "Série Littéraire (L)",
+    icon: "📚",
+    accentClass: "border-rose-400 text-rose-600 bg-rose-50",
+    accentDot: "bg-rose-400",
+    matieres: [
+      { nom: "Philosophie",                             coef: 7 },
+      { nom: "Arabe (LV1)",                             coef: 7 },
+      { nom: "Anglais (LV2)",                           coef: 6 },
+      { nom: "Français pour les Spécialités",           coef: 4 },
+      { nom: "Histoire et Géographie",                  coef: 4 },
+      { nom: "Français Écrit",                          coef: 3 },
+      { nom: "Français Oral",                           coef: 3 },
+      { nom: "Mathématiques",                           coef: 3 },
+      { nom: "Éducation Physique et Sportive (EPS)",    coef: 2 },
+    ]
+  }
+};
+
+
+/* ══════════════════════════════════════════════════════════════════
+   ÉTAT DE L'APPLICATION
+══════════════════════════════════════════════════════════════════ */
+let serieActive = null;   // clé de la série sélectionnée ("S", "ES", etc.)
+let notes       = {};     // { index: valeurNote }
+
+
+/* ══════════════════════════════════════════════════════════════════
+   INITIALISATION : Génération des cartes de série
+══════════════════════════════════════════════════════════════════ */
+function initSerieCards() {
+  const container = document.getElementById('serie-cards');
+  container.innerHTML = '';
+
+  const serieKeys = ['S', 'ES', 'SG', 'L'];
+  const staggerClasses = ['stagger-1','stagger-2','stagger-3','stagger-4'];
+
+  serieKeys.forEach((key, i) => {
+    const config = configurationsBac[key];
+    const nbMatieres = config.matieres.length;
+    const totalCoef  = config.matieres.reduce((s, m) => s + m.coef, 0);
+
+    const card = document.createElement('div');
+    card.className = `serie-card rounded-2xl shadow-card p-5 flex flex-col gap-3 animate-fade-slide-up ${staggerClasses[i]}`;
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('aria-label', `Sélectionner ${config.nom}`);
+    card.onclick = () => selectionnerSerie(key);
+    card.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') selectionnerSerie(key); };
+
+    card.innerHTML = `
+      <div class="text-3xl" aria-hidden="true">${config.icon}</div>
+      <div>
+        <span class="inline-block text-xs font-bold tracking-widest uppercase px-2 py-0.5 rounded-md ${config.accentClass} mb-1">${key}</span>
+        <p class="text-sm font-semibold text-slate-700 leading-snug">${config.nom.replace(`Série `, '').replace(` (${key})`, '')}</p>
+      </div>
+      <div class="mt-auto flex flex-wrap gap-2 text-xs text-slate-400">
+        <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full ${config.accentDot} inline-block"></span>${nbMatieres} matières</span>
+        <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-slate-300 inline-block"></span>Coef. total : ${totalCoef}</span>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   SÉLECTION D'UNE SÉRIE → Affichage du formulaire
+══════════════════════════════════════════════════════════════════ */
+function selectionnerSerie(key) {
+  serieActive = key;
+  notes       = {};
+
+  const config = configurationsBac[key];
+
+  // Mettre à jour le titre
+  document.getElementById('form-title').textContent = config.nom;
+
+  // Calculer le total des coefficients
+  const totalCoef = config.matieres.reduce((s, m) => s + m.coef, 0);
+  document.getElementById('total-coef-display').textContent = totalCoef;
+
+  // Générer la liste des matières
+  const listContainer = document.getElementById('matieres-list');
+  listContainer.innerHTML = '';
+
+  config.matieres.forEach((matiere, idx) => {
+    const row = document.createElement('div');
+    row.className = `matiere-row grid grid-cols-12 gap-2 items-center px-5 py-3.5 border-b border-slate-50 last:border-b-0`;
+    row.innerHTML = `
+      <!-- Nom de la matière -->
+      <div class="col-span-12 sm:col-span-5 flex flex-col sm:flex-row sm:items-center gap-1">
+        <span class="text-sm font-medium text-slate-700">${matiere.nom}</span>
+        <!-- Badge coef visible sur mobile -->
+        <span class="sm:hidden coef-badge inline-flex items-center text-xs text-slate-400 font-medium gap-0.5">
+          <span class="text-slate-300">•</span> Coef. ${matiere.coef}
+        </span>
+      </div>
+
+      <!-- Coefficient (desktop) -->
+      <div class="hidden sm:flex col-span-2 justify-center">
+        <span class="coef-label inline-flex items-center justify-center w-8 h-8 rounded-lg bg-royal text-white text-xs font-bold shadow-sm">${matiere.coef}</span>
+      </div>
+
+      <!-- Input note -->
+      <div class="col-span-8 sm:col-span-3 flex justify-center">
+        <input
+          id="note-${idx}"
+          type="number"
+          min="0" max="20" step="0.25"
+          placeholder="–"
+          class="note-input w-24 text-center rounded-xl py-2 px-3 text-sm font-semibold font-mono bg-slate-50"
+          oninput="handleNoteInput(${idx}, this)"
+          aria-label="Note de ${matiere.nom}"
+        />
+      </div>
+
+      <!-- Points calculés en temps réel -->
+      <div class="col-span-4 sm:col-span-2 flex justify-center items-center">
+        <span id="points-${idx}" class="text-sm font-bold font-mono text-slate-300">–</span>
+      </div>
+    `;
+    listContainer.appendChild(row);
+  });
+
+  // Réinitialiser la barre de progression
+  updateProgress();
+
+  // Cacher le résultat s'il était visible
+  document.getElementById('result-section').classList.add('hidden');
+
+  // Transition : cacher la sélection, afficher le formulaire
+  document.getElementById('serie-section').classList.add('hidden');
+  const formSection = document.getElementById('form-section');
+  formSection.classList.remove('hidden');
+  formSection.classList.add('animate-fade-slide-up');
+
+  // Scroller vers le formulaire
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   GESTION DE LA SAISIE D'UNE NOTE (validation temps réel)
+══════════════════════════════════════════════════════════════════ */
+function handleNoteInput(idx, input) {
+  let val = parseFloat(input.value);
+  const matiere = configurationsBac[serieActive].matieres[idx];
+  const pointsEl = document.getElementById(`points-${idx}`);
+
+  // Supprimer les anciennes classes de validation
+  input.classList.remove('valid', 'warning', 'invalid');
+
+  // Vider si le champ est vide ou invalide
+  if (input.value === '' || isNaN(val)) {
+    delete notes[idx];
+    pointsEl.textContent = '–';
+    pointsEl.className = 'text-sm font-bold font-mono text-slate-300';
+    updateProgress();
+    return;
+  }
+
+  // Borner entre 0 et 20
+  if (val < 0)  { val = 0;  input.value = 0; }
+  if (val > 20) { val = 20; input.value = 20; }
+
+  // Stocker la note
+  notes[idx] = val;
+
+  // Validation visuelle
+  if (val >= 10) {
+    input.classList.add('valid');
+    pointsEl.textContent = (val * matiere.coef).toFixed(2);
+    pointsEl.className = 'text-sm font-bold font-mono text-mint';
+  } else if (val >= 8) {
+    input.classList.add('warning');
+    pointsEl.textContent = (val * matiere.coef).toFixed(2);
+    pointsEl.className = 'text-sm font-bold font-mono text-amber-500';
+  } else {
+    input.classList.add('invalid');
+    pointsEl.textContent = (val * matiere.coef).toFixed(2);
+    pointsEl.className = 'text-sm font-bold font-mono text-rose-400';
+  }
+
+  updateProgress();
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   MISE À JOUR DE LA BARRE DE PROGRESSION
+══════════════════════════════════════════════════════════════════ */
+function updateProgress() {
+  const total    = configurationsBac[serieActive].matieres.length;
+  const remplis  = Object.keys(notes).length;
+  const pct      = total > 0 ? (remplis / total) * 100 : 0;
+
+  document.getElementById('progress-bar').style.width = `${pct}%`;
+  document.getElementById('progress-label').textContent = `${remplis} / ${total} matières`;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   CALCUL DU RÉSULTAT — Règles officielles du Bac de Djibouti
+══════════════════════════════════════════════════════════════════ */
+function calculerResultat() {
+  const config = configurationsBac[serieActive];
+
+  // Vérification : au moins une note saisie
+  if (Object.keys(notes).length === 0) {
+    alert('Veuillez saisir au moins une note avant de calculer.');
+    return;
+  }
+
+  // ── Calcul ──────────────────────────────────────────────────────
+  let totalPoints = 0;
+  let totalCoef   = 0;
+
+  const details = config.matieres.map((matiere, idx) => {
+    const note   = notes[idx] !== undefined ? notes[idx] : null;
+    const points = note !== null ? note * matiere.coef : null;
+
+    if (note !== null) {
+      totalPoints += points;
+      totalCoef   += matiere.coef;
+    }
+
+    return { ...matiere, note, points };
+  });
+
+  // Si aucun coef accumulé (impossible ici mais sécurité)
+  if (totalCoef === 0) return;
+
+  const moyenne = totalPoints / totalCoef;
+
+  // ── Verdict ─────────────────────────────────────────────────────
+  let verdict, verdictClass, mentionHTML = '';
+
+  if (moyenne >= 10) {
+    verdict      = 'ADMIS(E)';
+    verdictClass = 'result-admis pulse-admis';
+
+    // Mention
+    let mentionLabel, mentionClass;
+    if (moyenne >= 16) {
+      mentionLabel = '🏅 Mention Très Bien';
+      mentionClass = 'mention-tb';
+    } else if (moyenne >= 14) {
+      mentionLabel = '🥇 Mention Bien';
+      mentionClass = 'mention-b';
+    } else if (moyenne >= 12) {
+      mentionLabel = '🥈 Mention Assez Bien';
+      mentionClass = 'mention-ab';
+    } else {
+      mentionLabel = '✔️ Mention Passable';
+      mentionClass = 'mention-p';
+    }
+    mentionHTML = `<span class="mention-badge ${mentionClass}">${mentionLabel}</span>`;
+
+  } else if (moyenne >= 8) {
+    verdict      = 'SECOND TOUR';
+    verdictClass = 'result-second';
+  } else {
+    verdict      = 'AJOURNÉ(E)';
+    verdictClass = 'result-ajourn';
+  }
+
+  // ── Affichage de la carte résultat ──────────────────────────────
+  const resultCard  = document.getElementById('result-card');
+  resultCard.className = `rounded-2xl p-7 mb-5 animate-fade-slide-up shadow-card-lg ${verdictClass}`;
+
+  document.getElementById('avg-display').textContent       = moyenne.toFixed(2);
+  document.getElementById('verdict-badge').textContent     = verdict;
+  document.getElementById('mention-badge-container').innerHTML = mentionHTML;
+
+  // ── Détail du calcul ────────────────────────────────────────────
+  document.getElementById('total-points-display').textContent = totalPoints.toFixed(2);
+  document.getElementById('total-coef-result').textContent    = totalCoef;
+  document.getElementById('avg-calc-display').textContent     = moyenne.toFixed(4);
+
+  // ── Récapitulatif par matière ────────────────────────────────────
+  const recapList = document.getElementById('recap-list');
+  recapList.innerHTML = '';
+
+  details.forEach(({ nom, coef, note, points }) => {
+    const row = document.createElement('div');
+    row.className = 'flex items-center justify-between px-5 py-3.5 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors';
+
+    let noteBadge, pointsBadge;
+    if (note === null) {
+      noteBadge   = `<span class="text-sm font-mono text-slate-300 italic">–</span>`;
+      pointsBadge = `<span class="text-sm font-mono text-slate-300">–</span>`;
+    } else if (note >= 10) {
+      noteBadge   = `<span class="text-sm font-mono font-bold text-mint">${note.toFixed(2)}</span>`;
+      pointsBadge = `<span class="text-sm font-mono font-bold text-mint">${points.toFixed(2)}</span>`;
+    } else if (note >= 8) {
+      noteBadge   = `<span class="text-sm font-mono font-bold text-amber-500">${note.toFixed(2)}</span>`;
+      pointsBadge = `<span class="text-sm font-mono font-bold text-amber-500">${points.toFixed(2)}</span>`;
+    } else {
+      noteBadge   = `<span class="text-sm font-mono font-bold text-rose-400">${note.toFixed(2)}</span>`;
+      pointsBadge = `<span class="text-sm font-mono font-bold text-rose-400">${points.toFixed(2)}</span>`;
+    }
+
+    row.innerHTML = `
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium text-slate-700 truncate">${nom}</p>
+        <p class="text-xs text-slate-400">Coefficient ${coef}</p>
+      </div>
+      <div class="flex items-center gap-4 shrink-0 ml-3">
+        <div class="text-center w-14">
+          <div class="text-xs text-slate-400 mb-0.5">Note</div>
+          ${noteBadge}
+        </div>
+        <div class="text-center w-16">
+          <div class="text-xs text-slate-400 mb-0.5">Points</div>
+          ${pointsBadge}
+        </div>
+      </div>
+    `;
+    recapList.appendChild(row);
+  });
+
+  // ── Afficher la section résultat et défiler ──────────────────────
+  const resultSection = document.getElementById('result-section');
+  resultSection.classList.remove('hidden');
+
+  // Petit délai pour que l'animation s'enclenche proprement
+  setTimeout(() => {
+    resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   RÉINITIALISATIONS
+══════════════════════════════════════════════════════════════════ */
+
+/** Efface uniquement les notes du formulaire courant */
+function resetNotes() {
+  notes = {};
+  const config = configurationsBac[serieActive];
+  config.matieres.forEach((_, idx) => {
+    const input   = document.getElementById(`note-${idx}`);
+    const pointsEl= document.getElementById(`points-${idx}`);
+    if (input) {
+      input.value = '';
+      input.classList.remove('valid', 'warning', 'invalid');
+    }
+    if (pointsEl) {
+      pointsEl.textContent = '–';
+      pointsEl.className   = 'text-sm font-bold font-mono text-slate-300';
+    }
+  });
+  document.getElementById('result-section').classList.add('hidden');
+  updateProgress();
+}
+
+/** Retourne à la sélection de série */
+function resetSerie() {
+  serieActive = null;
+  notes       = {};
+  document.getElementById('form-section').classList.add('hidden');
+  document.getElementById('result-section').classList.add('hidden');
+  document.getElementById('serie-section').classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/** Réinitialisation complète (bouton "Nouvelle simulation") */
+function resetAll() {
+  resetSerie();
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   DÉMARRAGE
+══════════════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  // Générer les cartes de série au chargement
+  initSerieCards();
+});
+
+</script>
+</body>
+</html>
