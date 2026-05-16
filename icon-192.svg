@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <!-- Fond -->
+  <rect width="192" height="192" rx="40" fill="#1e40af"/>
+  <!-- Chapeau mortier -->
+  <rect x="30" y="100" width="132" height="22" rx="11" fill="#fff"/>
+  <polygon points="96,28 164,80 96,100 28,80" fill="#fff"/>
+  <polygon points="96,34 158,80 96,96 34,80" fill="#3b5fd6"/>
+  <!-- Corde -->
+  <line x1="162" y1="80" x2="162" y2="118" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="162" cy="126" r="8" fill="#10b981"/>
+  <!-- Coche verte -->
+  <circle cx="130" cy="152" r="28" fill="#10b981"/>
+  <polyline points="118,152 126,160 142,144" stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

@@ -1,0 +1,41 @@
+{
+  "name": "BacSimul – Baccalauréat Djibouti",
+  "short_name": "BacSimul",
+  "description": "Simulateur de calcul de notes au Baccalauréat général de Djibouti (S, ES, SG, L)",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#1e40af",
+  "orientation": "portrait-primary",
+  "categories": ["education"],
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Série S",
+      "short_name": "Série S",
+      "description": "Simuler la Série Scientifique",
+      "url": "./index.html#S"
+    },
+    {
+      "name": "Série ES",
+      "short_name": "Série ES",
+      "description": "Simuler la Série Économique",
+      "url": "./index.html#ES"
+    }
+  ]
+}
