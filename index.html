@@ -1338,92 +1338,262 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <!-- ══════════════════════════════════════════════════════════════════
-     PWA — Enregistrement du Service Worker + Bannière installation
+     PWA — Bannières (installation + mise à jour + hors ligne)
 ══════════════════════════════════════════════════════════════════ -->
-<div id="pwa-install-bar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:999;
-  background:linear-gradient(90deg,#1e40af,#1e3a8a);color:#fff;
-  padding:.75rem 1rem;font-family:system-ui,sans-serif;font-size:.82rem;
-  display:none;align-items:center;justify-content:space-between;gap:.75rem;
-  border-top:1px solid rgba(255,255,255,.15);box-shadow:0 -4px 20px rgba(0,0,0,.25)">
-  <div style="display:flex;align-items:center;gap:.6rem">
-    <svg width="20" height="20" viewBox="0 0 38 38" fill="none">
+
+<!-- 1. Bannière : proposer l'installation -->
+<div id="pwa-install-bar" style="
+  display:none; position:fixed; bottom:0; left:0; right:0; z-index:1000;
+  background:linear-gradient(90deg,#1e40af,#1e3a8a); color:#fff;
+  padding:.75rem 1rem; font-family:system-ui,sans-serif; font-size:.82rem;
+  align-items:center; justify-content:space-between; gap:.75rem;
+  border-top:1px solid rgba(255,255,255,.15);
+  box-shadow:0 -4px 24px rgba(0,0,0,.30);">
+  <div style="display:flex;align-items:center;gap:.6rem;min-width:0">
+    <svg width="22" height="22" viewBox="0 0 38 38" fill="none" style="flex-shrink:0">
       <rect x="4" y="18" width="30" height="5" rx="2.5" fill="white"/>
       <polygon points="19,5 35,16 19,21 3,16" fill="white"/>
       <circle cx="26" cy="30" r="6.5" fill="#10b981"/>
-      <polyline points="22.5,30 25,32.5 29.5,27.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <polyline points="22.5,30 25,32.5 29.5,27.5" stroke="white" stroke-width="1.8"
+        stroke-linecap="round" stroke-linejoin="round" fill="none"/>
     </svg>
-    <span><strong>Installer BacSimul</strong> — utilisable sans internet 📱</span>
+    <div>
+      <div style="font-weight:700;font-size:.83rem">Installer BacSimul 📱</div>
+      <div style="font-size:.72rem;opacity:.75">Utilisable sans connexion internet</div>
+    </div>
   </div>
   <div style="display:flex;gap:.5rem;flex-shrink:0">
-    <button onclick="pwaInstall()" style="background:#10b981;color:#fff;border:none;
-      padding:.4rem .9rem;border-radius:.5rem;font-weight:600;cursor:pointer;font-size:.8rem">
+    <button onclick="pwaInstall()" style="
+      background:#10b981;color:#fff;border:none;
+      padding:.45rem 1rem;border-radius:.5rem;
+      font-weight:700;cursor:pointer;font-size:.8rem;
+      box-shadow:0 2px 8px rgba(16,185,129,.4)">
       Installer
     </button>
-    <button onclick="document.getElementById('pwa-install-bar').style.display='none'"
-      style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.25);
-      padding:.4rem .7rem;border-radius:.5rem;cursor:pointer;font-size:.8rem">
+    <button onclick="fermerBanniere('pwa-install-bar')" style="
+      background:rgba(255,255,255,.12);color:#fff;
+      border:1px solid rgba(255,255,255,.22);
+      padding:.45rem .7rem;border-radius:.5rem;cursor:pointer;font-size:.85rem">
       ✕
     </button>
   </div>
 </div>
 
-<!-- Bannière offline -->
-<div id="offline-bar" style="display:none;position:fixed;top:64px;left:0;right:0;z-index:998;
-  background:#f59e0b;color:#1c1917;padding:.5rem 1rem;font-size:.78rem;font-weight:600;
-  text-align:center;font-family:system-ui,sans-serif">
+<!-- 2. Bannière : nouvelle version disponible -->
+<div id="pwa-update-bar" style="
+  display:none; position:fixed; bottom:0; left:0; right:0; z-index:1001;
+  background:linear-gradient(90deg,#065f46,#059669); color:#fff;
+  padding:.75rem 1rem; font-family:system-ui,sans-serif; font-size:.82rem;
+  align-items:center; justify-content:space-between; gap:.75rem;
+  border-top:2px solid #10b981;
+  box-shadow:0 -4px 24px rgba(16,185,129,.35);">
+  <div style="display:flex;align-items:center;gap:.65rem;min-width:0">
+    <!-- Icône sparkle -->
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"
+      viewBox="0 0 24 24" style="flex-shrink:0">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+    </svg>
+    <div>
+      <div style="font-weight:700;font-size:.83rem">🎉 Nouvelle version disponible !</div>
+      <div style="font-size:.72rem;opacity:.80" id="update-version-label">
+        BacSimul a été mis à jour par ton prof
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;gap:.5rem;flex-shrink:0">
+    <button onclick="appliquerMiseAJour()" style="
+      background:#fff;color:#065f46;border:none;
+      padding:.45rem 1rem;border-radius:.5rem;
+      font-weight:700;cursor:pointer;font-size:.8rem;
+      box-shadow:0 2px 8px rgba(0,0,0,.15)">
+      Mettre à jour
+    </button>
+    <button onclick="fermerBanniere('pwa-update-bar')" style="
+      background:rgba(255,255,255,.15);color:#fff;
+      border:1px solid rgba(255,255,255,.25);
+      padding:.45rem .7rem;border-radius:.5rem;cursor:pointer;font-size:.85rem">
+      Plus tard
+    </button>
+  </div>
+</div>
+
+<!-- 3. Bannière : mode hors ligne -->
+<div id="offline-bar" style="
+  display:none; position:fixed; top:64px; left:0; right:0; z-index:999;
+  background:#f59e0b; color:#1c1917;
+  padding:.45rem 1rem; font-size:.76rem; font-weight:600;
+  text-align:center; font-family:system-ui,sans-serif;
+  box-shadow:0 2px 10px rgba(245,158,11,.3)">
   📵 Hors ligne — BacSimul fonctionne normalement en mode local
 </div>
 
 <script>
-/* ── Service Worker ── */
+/* ═══════════════════════════════════════════════════════════════════
+   PWA — Service Worker + Gestion des mises à jour
+═══════════════════════════════════════════════════════════════════ */
+
+/* Version affichée dans l'app (doit correspondre à APP_VERSION dans sw.js) */
+const APP_VERSION_UI = '1.0.0';
+
+let swRegistration  = null;   // registration SW active
+let swEnAttente     = null;   // nouveau SW en attente d'activation
+let deferredPrompt  = null;   // prompt natif d'installation PWA
+
+/* ── Utilitaire : fermer une bannière ── */
+function fermerBanniere(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = 'none';
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   1. Enregistrement du Service Worker
+───────────────────────────────────────────────────────────────── */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
       .then(reg => {
-        console.log('[BacSimul] SW enregistré :', reg.scope);
-        // Vérifier les mises à jour
+        swRegistration = reg;
+        console.log('[BacSimul] SW enregistré ✓ scope:', reg.scope);
+
+        /* ── Cas A : un nouveau SW est déjà en attente au chargement ── */
+        if (reg.waiting) {
+          swEnAttente = reg.waiting;
+          afficherBanniereMAJ();
+        }
+
+        /* ── Cas B : un nouveau SW s'installe pendant la session ── */
         reg.addEventListener('updatefound', () => {
-          const newSW = reg.installing;
-          newSW.addEventListener('statechange', () => {
-            if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
-              console.log('[BacSimul] Mise à jour disponible');
+          const nouveauSW = reg.installing;
+          console.log('[BacSimul] Nouveau SW détecté, installation…');
+
+          nouveauSW.addEventListener('statechange', () => {
+            console.log('[BacSimul] SW state:', nouveauSW.state);
+
+            if (nouveauSW.state === 'installed') {
+              if (navigator.serviceWorker.controller) {
+                /* Il y avait déjà un SW actif → c'est une mise à jour */
+                swEnAttente = nouveauSW;
+                afficherBanniereMAJ();
+              } else {
+                /* Premier install → l'app est maintenant cachée offline */
+                console.log('[BacSimul] App mise en cache pour usage hors ligne ✓');
+              }
             }
           });
         });
+
+        /* ── Vérification périodique des mises à jour (toutes les 60s) ── */
+        setInterval(() => {
+          reg.update().catch(() => {}); // silencieux si hors ligne
+        }, 60 * 1000);
       })
-      .catch(err => console.warn('[BacSimul] SW échec :', err));
+      .catch(err => console.warn('[BacSimul] SW échec:', err));
+
+    /* ── Écouter les messages du SW (version active, activation) ── */
+    navigator.serviceWorker.addEventListener('message', event => {
+      if (!event.data) return;
+
+      if (event.data.type === 'SW_ACTIVATED') {
+        /* Le nouveau SW vient de prendre le contrôle → recharger */
+        console.log('[BacSimul] SW activé v' + event.data.version + ' → rechargement');
+        window.location.reload();
+      }
+
+      if (event.data.type === 'SW_VERSION') {
+        console.log('[BacSimul] Version SW active :', event.data.version);
+      }
+    });
+
+    /* ── Rechargement automatique quand le SW change de contrôleur ── */
+    let swRefreshPending = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (swRefreshPending) return;
+      swRefreshPending = true;
+      console.log('[BacSimul] Nouveau SW en contrôle → rechargement');
+      window.location.reload();
+    });
   });
 }
 
-/* ── Bannière Installation PWA ── */
-let deferredPrompt = null;
+/* ─────────────────────────────────────────────────────────────────
+   2. Afficher la bannière de mise à jour
+───────────────────────────────────────────────────────────────── */
+function afficherBanniereMAJ() {
+  /* Demander la version au nouveau SW */
+  if (swEnAttente) {
+    swEnAttente.postMessage({ type: 'GET_VERSION' });
+  }
+
+  const bar = document.getElementById('pwa-update-bar');
+  const lbl = document.getElementById('update-version-label');
+  if (lbl) lbl.textContent = `BacSimul a été mis à jour par ton prof`;
+  if (bar) {
+    /* Fermer d'abord la bannière d'install si elle était ouverte */
+    fermerBanniere('pwa-install-bar');
+    /* Animation d'entrée douce */
+    bar.style.display = 'flex';
+    bar.style.animation = 'slideUpBar .4s cubic-bezier(.22,1,.36,1)';
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   3. L'élève clique "Mettre à jour"
+   → On envoie SKIP_WAITING au SW en attente
+   → Le SW saute la phase waiting et s'active
+   → controllerchange se déclenche → reload automatique
+───────────────────────────────────────────────────────────────── */
+function appliquerMiseAJour() {
+  if (!swEnAttente) {
+    window.location.reload();
+    return;
+  }
+
+  /* Bouton en état de chargement */
+  const btn = document.querySelector('#pwa-update-bar button');
+  if (btn) { btn.textContent = '⏳ Mise à jour…'; btn.disabled = true; }
+
+  /* Envoyer le signal au Service Worker */
+  swEnAttente.postMessage({ type: 'SKIP_WAITING' });
+  /* Le rechargement sera déclenché par l'événement controllerchange */
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   4. Bannière d'installation PWA (prompt natif Android/Chrome)
+───────────────────────────────────────────────────────────────── */
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   deferredPrompt = e;
-  // Afficher la barre d'installation après 3s
+  /* Afficher après 4 secondes si l'app n'est pas déjà installée */
   setTimeout(() => {
-    const bar = document.getElementById('pwa-install-bar');
-    if (bar) bar.style.display = 'flex';
-  }, 3000);
+    if (!window.matchMedia('(display-mode: standalone)').matches) {
+      const bar = document.getElementById('pwa-install-bar');
+      if (bar) bar.style.display = 'flex';
+    }
+  }, 4000);
 });
 
 function pwaInstall() {
   if (!deferredPrompt) return;
   deferredPrompt.prompt();
   deferredPrompt.userChoice.then(result => {
-    if (result.outcome === 'accepted') {
-      document.getElementById('pwa-install-bar').style.display = 'none';
-    }
+    fermerBanniere('pwa-install-bar');
     deferredPrompt = null;
+    if (result.outcome === 'accepted') {
+      console.log('[BacSimul] Installation acceptée ✓');
+    }
   });
 }
 
 window.addEventListener('appinstalled', () => {
-  document.getElementById('pwa-install-bar').style.display = 'none';
-  console.log('[BacSimul] App installée !');
+  fermerBanniere('pwa-install-bar');
+  deferredPrompt = null;
+  console.log('[BacSimul] App installée avec succès ✓');
 });
 
-/* ── Détection hors ligne ── */
+/* ─────────────────────────────────────────────────────────────────
+   5. Indicateur hors ligne
+───────────────────────────────────────────────────────────────── */
 function majEtatReseau() {
   const bar = document.getElementById('offline-bar');
   if (!bar) return;
@@ -1433,6 +1603,13 @@ window.addEventListener('online',  majEtatReseau);
 window.addEventListener('offline', majEtatReseau);
 majEtatReseau();
 </script>
+
+<style>
+@keyframes slideUpBar {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+</style>
 
 </body>
 </html>
