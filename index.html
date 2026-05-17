@@ -320,34 +320,52 @@
        RECOMMANDATIONS SECOND TOUR
     ══════════════════════════════════════════════════════════════ */
     #reco-second {
-      border-radius:1rem;
-      background: linear-gradient(135deg,rgba(245,158,11,.06),rgba(239,68,68,.04));
-      border: 1.5px solid rgba(245,158,11,.35);
       animation: fadeSlideUp .5s .1s both;
     }
-    html.dark #reco-second {
-      background: linear-gradient(135deg,rgba(245,158,11,.10),rgba(239,68,68,.07));
+    .combo-card {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border);
+      border-radius: 1rem;
+      overflow: hidden;
+      transition: border-color .2s, box-shadow .2s;
     }
-    .reco-mat-row {
-      display:flex; align-items:center; gap:.75rem;
-      padding:.65rem 0;
-      border-bottom:1px solid rgba(245,158,11,.15);
+    .combo-card:hover {
+      border-color: #3b5fd6;
+      box-shadow: 0 4px 20px -4px rgba(30,64,175,.18);
     }
-    .reco-mat-row:last-child { border-bottom:none; }
-    .priority-bar {
-      height:.35rem; border-radius:999px;
-      background:linear-gradient(90deg,#f43f5e,#f59e0b);
-      transition: width .6s cubic-bezier(.22,1,.36,1);
+    .combo-card.best {
+      border-color: #10b981;
+      box-shadow: 0 4px 24px -4px rgba(16,185,129,.25);
     }
-    .reco-tip {
-      display:inline-block;
-      font-size:.7rem; font-weight:600;
-      padding:.15rem .55rem; border-radius:999px;
-      white-space:nowrap;
+    .combo-rank {
+      width: 2rem; height: 2rem; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .75rem; font-weight: 800; flex-shrink: 0;
     }
-    .tip-urgent { background:rgba(244,63,94,.12); color:#dc2626; border:1px solid rgba(244,63,94,.25); }
-    .tip-fort   { background:rgba(245,158,11,.12); color:#b45309; border:1px solid rgba(245,158,11,.25); }
-    .tip-ok     { background:rgba(16,185,129,.10); color:#065f46; border:1px solid rgba(16,185,129,.22); }
+    .rank-1 { background:#10b981; color:#fff; }
+    .rank-2 { background:#3b5fd6; color:#fff; }
+    .rank-3 { background:#64748b; color:#fff; }
+
+    .note-requise-bar {
+      height: .35rem; border-radius: 999px; overflow: hidden;
+      background: var(--border); margin-top: .4rem;
+    }
+    .note-requise-fill {
+      height: 100%; border-radius: 999px;
+      transition: width .7s cubic-bezier(.22,1,.36,1);
+    }
+    .fill-easy   { background: linear-gradient(90deg,#10b981,#34d399); }
+    .fill-medium { background: linear-gradient(90deg,#f59e0b,#fbbf24); }
+    .fill-hard   { background: linear-gradient(90deg,#f43f5e,#fb7185); }
+
+    .feasibility-badge {
+      font-size: .68rem; font-weight: 700; padding: .2rem .6rem;
+      border-radius: 999px; white-space: nowrap;
+    }
+    .fb-easy   { background:rgba(16,185,129,.12); color:#065f46; border:1px solid rgba(16,185,129,.3); }
+    .fb-medium { background:rgba(245,158,11,.12);  color:#92400e; border:1px solid rgba(245,158,11,.3); }
+    .fb-hard   { background:rgba(244,63,94,.10);   color:#be123c; border:1px solid rgba(244,63,94,.25); }
+    .fb-impossible { background:rgba(100,116,139,.10); color:#475569; border:1px solid var(--border); }
   </style>
 </head>
 <body>
@@ -567,19 +585,56 @@
         </div>
       </div>
 
-      <!-- ─── RECOMMANDATIONS SECOND TOUR (affiché si verdict = second tour) ── -->
-      <div id="reco-second" class="hidden p-5 mb-5">
-        <div class="flex items-center gap-2 mb-1">
-          <svg class="w-5 h-5 shrink-0" style="color:#f59e0b" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-          </svg>
-          <h3 class="text-base font-bold" style="color:#92400e">Stratégie Second Tour 🎯</h3>
+      <!-- ═══════════════════════════════════════════════════════════
+           SIMULATEUR SECOND TOUR
+           Affiché uniquement si moyenne entre 8.00 et 9.99
+      ═══════════════════════════════════════════════════════════ -->
+      <div id="reco-second" class="hidden mb-5">
+
+        <!-- En-tête -->
+        <div class="rounded-2xl p-5 mb-3" style="
+          background:linear-gradient(135deg,rgba(245,158,11,.08),rgba(239,68,68,.05));
+          border:1.5px solid rgba(245,158,11,.35)">
+
+          <div class="flex items-center gap-2 mb-1">
+            <svg class="w-5 h-5 shrink-0" style="color:#f59e0b" fill="none"
+              stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+            <h3 class="text-base font-bold" style="color:#92400e">
+              Simulateur Second Tour 🎯
+            </h3>
+          </div>
+
+          <p class="text-xs t-muted mb-4 leading-relaxed">
+            Tu passes en <strong>Second Tour</strong>. À Djibouti tu peux repasser
+            <strong>2 matières</strong> de ton choix (hors Français Écrit, Français Oral et EPS
+            qui sont des épreuves anticipées). Ci-dessous les meilleures combinaisons
+            calculées automatiquement.
+          </p>
+
+          <!-- Points manquants -->
+          <div class="flex items-center gap-3 p-3 rounded-xl mb-1"
+            style="background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.2)">
+            <svg class="w-4 h-4 shrink-0" style="color:#f43f5e" fill="none"
+              stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p class="text-xs font-medium" style="color:#be123c" id="pts-manquants-txt"></p>
+          </div>
         </div>
-        <p class="text-xs t-muted mb-4">Tu passes en Second Tour. Concentre-toi sur ces matières pour maximiser tes chances. Les matières avec le plus grand coefficient ont la priorité absolue.</p>
-        <div id="reco-rows"></div>
-        <div class="mt-4 p-3 rounded-xl text-xs" style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2)">
-          <strong style="color:#b45309">💡 Conseil :</strong>
-          <span class="t-muted"> Au second tour, chaque point dans une matière à fort coefficient peut faire basculer ta moyenne. Révise d'abord les matières marquées <strong>URGENT</strong>, puis les autres dans l'ordre affiché.</span>
+
+        <!-- TOP 3 combinaisons -->
+        <div id="combos-list" class="flex flex-col gap-3"></div>
+
+        <!-- Règle rappel -->
+        <div class="mt-3 p-3 rounded-xl text-xs t-muted leading-relaxed"
+          style="background:var(--bg-sub);border:1px solid var(--border)">
+          <strong class="t-primary">📌 Règles :</strong>
+          La nouvelle note <strong>remplace</strong> l'ancienne · Pas de plafond (20/20 possible) ·
+          Français Écrit, Français Oral et EPS sont exclus car anticipés.
         </div>
       </div>
 
@@ -1264,65 +1319,240 @@ function initMotiv() {
 
 
 /* ══════════════════════════════════════════════════════════════════
-   RECOMMANDATIONS SECOND TOUR
-   Affiche les matières < 10 triées par priorité (coef × écart à 10)
+   SIMULATEUR SECOND TOUR — Djibouti
+   Règles :
+     • L'élève repasse exactement 2 matières
+     • La nouvelle note remplace l'ancienne (pas de moyenne des deux)
+     • Pas de plafond (0–20 possible)
+     • Matières EXCLUES : Français Écrit, Français Oral, EPS (anticipés)
+     • But : trouver la combinaison de 2 matières qui minimise
+       la note maximale à obtenir pour atteindre moyenne ≥ 10
 ══════════════════════════════════════════════════════════════════ */
+
+/* Noms exacts des matières exclues du second tour */
+const MATIERES_EXCLUES_2ND = [
+  'Français Écrit',
+  'Français Oral',
+  'Éducation Physique et Sportive (EPS)',
+];
+
 function afficherRecoSecondTour(detail) {
   const bloc = document.getElementById('reco-second');
-  const rows = document.getElementById('reco-rows');
 
-  /* Matières avec note < 10 seulement */
-  const faibles = detail
-    .filter(d => d.n !== null && d.n < 10)
-    .map(d => ({
-      ...d,
-      ecart:    10 - d.n,                      // points manquants pour atteindre 10
-      priorite: (10 - d.n) * d.coef,           // score de priorité : plus c'est élevé, plus urgent
-    }))
-    .sort((a,b) => b.priorite - a.priorite);   // tri décroissant
+  /* ── 1. Construire la liste des matières éligibles ── */
+  const eligibles = detail
+    .filter(d => d.n !== null)                                          // note saisie
+    .filter(d => !MATIERES_EXCLUES_2ND.some(ex => d.nom.includes(ex.replace('Éducation Physique et Sportive (EPS)', 'EPS').split('(')[0].trim()) || d.nom === ex));
 
-  if(faibles.length === 0){ bloc.classList.add('hidden'); return; }
+  /* Filtre plus robuste sur les noms exacts */
+  const eligible2 = detail
+    .filter(d => d.n !== null)
+    .filter(d => {
+      const nomNorm = d.nom.trim().toLowerCase();
+      return !MATIERES_EXCLUES_2ND.some(ex => nomNorm === ex.trim().toLowerCase());
+    });
 
-  const maxPrio = faibles[0].priorite;
+  if (eligible2.length < 2) {
+    bloc.classList.add('hidden');
+    return;
+  }
 
-  rows.innerHTML = faibles.map(m => {
-    const pct = Math.round((m.priorite / maxPrio) * 100);
+  /* ── 2. Calcul de base : points actuels et total coefs ── */
+  const mats         = BAC[serie].matieres;
+  const totalCoef    = mats.reduce((s, m) => s + m.coef, 0);
+  const pointsActuels = detail.reduce((s, d) => s + (d.n !== null ? d.n * d.coef : 0), 0);
+  const coefSaisis   = detail.reduce((s, d) => s + (d.n !== null ? d.coef : 0), 0);
 
-    /* Étiquette de priorité */
-    let tipClass, tipLabel, conseils;
-    if(m.priorite >= maxPrio * 0.7){
-      tipClass = 'tip-urgent'; tipLabel = '🔴 URGENT';
-      conseils = `Note actuelle : ${m.n.toFixed(2)}/20 — Il te manque ${m.ecart.toFixed(2)} points. Avec un coef. ${m.coef}, chaque point ici rapporte ${m.coef} pts. Priorité absolue !`;
-    } else if(m.priorite >= maxPrio * 0.35){
-      tipClass = 'tip-fort'; tipLabel = '🟠 Important';
-      conseils = `Note actuelle : ${m.n.toFixed(2)}/20. Coef. ${m.coef} — un effort ciblé ici peut faire la différence.`;
+  /* Points nécessaires pour atteindre exactement 10.00 de moyenne */
+  const ptsNecessaires = 10 * totalCoef;
+  const ptsManquants   = ptsNecessaires - pointsActuels;
+
+  /* Afficher les points manquants */
+  const ptsTxt = document.getElementById('pts-manquants-txt');
+  if (ptsTxt) {
+    if (ptsManquants <= 0) {
+      ptsTxt.textContent = '✅ Tu as déjà suffisamment de points pour être admis(e) !';
     } else {
-      tipClass = 'tip-ok'; tipLabel = '🟡 À surveiller';
-      conseils = `Note actuelle : ${m.n.toFixed(2)}/20. Coef. ${m.coef} — révise une fois les priorités traitées.`;
+      ptsTxt.textContent =
+        `Il te manque ${ptsManquants.toFixed(2)} points au total pour atteindre la moyenne de 10.` +
+        ` Ta moyenne actuelle : ${(pointsActuels / coefSaisis).toFixed(2)}/20.`;
+    }
+  }
+
+  /* ── 3. Générer toutes les combinaisons de 2 matières éligibles ── */
+  const combos = [];
+
+  for (let i = 0; i < eligible2.length; i++) {
+    for (let j = i + 1; j < eligible2.length; j++) {
+      const m1 = eligible2[i];
+      const m2 = eligible2[j];
+
+      /*
+        Quand l'élève repasse m1 et m2 avec des notes n1 et n2 :
+        Nouveau total de points =
+          pointsActuels
+          - (ancienne note m1 × coef m1) - (ancienne note m2 × coef m2)
+          + n1 × coef m1 + n2 × coef m2
+
+        Pour atteindre 10 :
+          pointsActuels - m1.n×m1.coef - m2.n×m2.coef + n1×m1.coef + n2×m2.coef
+          = 10 × totalCoef
+
+        → n1×coef1 + n2×coef2 = ptsNecessaires - pointsActuels + m1.n×m1.coef + m2.n×m2.coef
+        → cible = ptsManquants + m1.n×m1.coef + m2.n×m2.coef
+           (points à "regagner" dans ces 2 matières)
+
+        Pour minimiser l'effort, on suppose n1 = n2 = note_cible_uniforme :
+        note_cible = cible / (coef1 + coef2)
+
+        On calcule aussi la note si l'une est à 20 :
+        Si n1 = 20 → n2 = (cible - 20×coef1) / coef2
+        Si n2 = 20 → n1 = (cible - 20×coef2) / coef1
+      */
+      const ptsPerdus = m1.n * m1.coef + m2.n * m2.coef;
+      const cible     = ptsManquants + ptsPerdus;
+      const coefTotal2 = m1.coef + m2.coef;
+
+      /* Note uniforme requise dans les deux matières */
+      const noteUniforme = cible / coefTotal2;
+
+      /* Gain max possible (les deux à 20) */
+      const gainMax = 20 * m1.coef + 20 * m2.coef;
+      const faisable = gainMax >= cible;
+
+      /* Note à obtenir dans m2 si m1 = 20 (optimisation) */
+      const noteM2si20 = (cible - 20 * m1.coef) / m2.coef;
+      /* Note à obtenir dans m1 si m2 = 20 */
+      const noteM1si20 = (cible - 20 * m2.coef) / m1.coef;
+
+      /* Score de "facilité" : plus la note uniforme est basse, plus c'est facile */
+      const scoreFacilite = faisable ? noteUniforme : 999;
+
+      combos.push({
+        m1, m2,
+        noteUniforme,
+        noteM2si20,
+        noteM1si20,
+        cible,
+        coefTotal2,
+        faisable,
+        gainMax,
+        scoreFacilite,
+      });
+    }
+  }
+
+  /* ── 4. Trier par facilité (note uniforme la plus basse en tête) ── */
+  combos.sort((a, b) => a.scoreFacilite - b.scoreFacilite);
+  const top3 = combos.slice(0, 3);
+
+  /* ── 5. Construire le HTML des cartes ── */
+  const container = document.getElementById('combos-list');
+  if (!container) return;
+  container.innerHTML = '';
+
+  top3.forEach((combo, rang) => {
+    const rankClass  = ['rank-1','rank-2','rank-3'][rang];
+    const rankLabel  = ['🥇 Meilleur choix','🥈 2ème option','🥉 3ème option'][rang];
+    const isBest     = rang === 0;
+
+    /* Évaluation de la faisabilité */
+    let fbClass, fbLabel, difficulte;
+    if (!combo.faisable) {
+      fbClass = 'fb-impossible'; fbLabel = '❌ Impossible'; difficulte = 'impossible';
+    } else if (combo.noteUniforme <= 10) {
+      fbClass = 'fb-easy';   fbLabel = '✅ Accessible';  difficulte = 'easy';
+    } else if (combo.noteUniforme <= 14) {
+      fbClass = 'fb-medium'; fbLabel = '⚡ Challengeant'; difficulte = 'medium';
+    } else {
+      fbClass = 'fb-hard';   fbLabel = '🔥 Difficile';   difficulte = 'hard';
     }
 
-    return `
-      <div class="reco-mat-row">
-        <!-- Nom + tip -->
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-2 flex-wrap mb-1">
-            <span class="text-sm font-semibold t-primary">${m.nom}</span>
-            <span class="reco-tip ${tipClass}">${tipLabel}</span>
+    const fillClass = { easy:'fill-easy', medium:'fill-medium', hard:'fill-hard', impossible:'fill-hard' }[difficulte];
+    const barPct    = combo.faisable ? Math.min(100, (combo.noteUniforme / 20) * 100) : 100;
+
+    /* Formatage des notes requises */
+    const fmt = n => isFinite(n) && n >= 0 && n <= 20
+      ? n.toFixed(2)
+      : n > 20 ? '> 20' : '–';
+
+    /* Ligne pour chaque matière */
+    const ligneMatiere = (m, noteRequise, noteOptim, labelOptim) => {
+      const noteAncienne = m.n.toFixed(2);
+      const gain = (noteRequise - m.n).toFixed(2);
+      const gainColor = gain > 0 ? '#f43f5e' : '#10b981';
+      const gainTxt   = gain > 0 ? `+${gain} pts à gagner` : `déjà suffisant`;
+
+      return `
+        <div class="flex items-start justify-between gap-3 py-2.5"
+          style="border-bottom:1px solid var(--border-soft)">
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold t-primary truncate">${m.nom}</p>
+            <p class="text-xs t-muted">Coeff. ${m.coef} · Note actuelle : <span class="font-mono font-bold" style="color:#f43f5e">${noteAncienne}</span>/20</p>
+            <!-- Barre de note requise -->
+            <div class="note-requise-bar">
+              <div class="note-requise-fill ${fillClass}"
+                style="width:${Math.min(100,(noteRequise/20)*100)}%"></div>
+            </div>
           </div>
-          <p class="text-xs t-muted leading-relaxed">${conseils}</p>
-          <!-- Barre de priorité -->
-          <div class="mt-2 h-1.5 rounded-full overflow-hidden" style="background:var(--border)">
-            <div class="priority-bar" style="width:${pct}%"></div>
+          <div class="text-right shrink-0">
+            <div class="text-xs t-faint mb-0.5">Note à obtenir</div>
+            <div class="text-lg font-extrabold font-mono" style="color:${combo.faisable ? '#1e40af' : '#94a3b8'}">${fmt(noteRequise)}</div>
+            <div class="text-xs font-medium" style="color:${gainColor}">${gainTxt}</div>
           </div>
+        </div>`;
+    };
+
+    const card = document.createElement('div');
+    card.className = `combo-card${isBest ? ' best' : ''}`;
+    card.style.animation = `fadeSlideUp .4s ${rang * .08 + .05}s both`;
+
+    card.innerHTML = `
+      <!-- En-tête carte -->
+      <div class="flex items-center justify-between px-4 py-3"
+        style="background:var(--bg-sub);border-bottom:1px solid var(--border)">
+        <div class="flex items-center gap-2">
+          <div class="combo-rank ${rankClass}">${rang + 1}</div>
+          <span class="text-sm font-bold t-primary">${rankLabel}</span>
+          ${isBest ? '<span class="text-xs px-2 py-0.5 rounded-full font-semibold" style="background:rgba(16,185,129,.12);color:#065f46;border:1px solid rgba(16,185,129,.3)">Recommandé</span>' : ''}
         </div>
-        <!-- Score -->
-        <div class="shrink-0 text-right ml-3">
-          <div class="text-xs t-faint mb-0.5">Note</div>
-          <div class="text-base font-bold font-mono" style="color:#f43f5e">${m.n.toFixed(2)}</div>
-          <div class="text-xs t-faint">/ 20</div>
+        <span class="feasibility-badge ${fbClass}">${fbLabel}</span>
+      </div>
+
+      <!-- Corps : les 2 matières -->
+      <div class="px-4 pt-1 pb-3">
+        ${ligneMatiere(combo.m1, combo.noteUniforme)}
+        ${ligneMatiere(combo.m2, combo.noteUniforme)}
+      </div>
+
+      <!-- Résumé stratégie -->
+      <div class="px-4 pb-3">
+        <div class="rounded-xl p-3 text-xs leading-relaxed"
+          style="background:rgba(30,64,175,.05);border:1px solid rgba(30,64,175,.1)">
+          <strong class="t-primary">📊 Stratégie :</strong>
+          <span class="t-muted">
+            Obtiens <strong>${fmt(combo.noteUniforme)}/20</strong> dans les deux matières
+            pour atteindre exactement la moyenne de 10.
+            ${combo.faisable && combo.noteM2si20 >= 0 && combo.noteM2si20 <= 20
+              ? ` Ou vise <strong>20/20 en ${combo.m1.nom.split(' ')[0]}</strong> et tu n'auras besoin que de <strong>${fmt(combo.noteM2si20)}/20 en ${combo.m2.nom.split(' ')[0]}</strong>.`
+              : ''}
+            Coef. combiné : <strong>${combo.coefTotal2}</strong>.
+          </span>
         </div>
       </div>`;
-  }).join('');
+
+    container.appendChild(card);
+  });
+
+  /* Cas où aucune combinaison n'est faisable */
+  if (top3.every(c => !c.faisable)) {
+    container.innerHTML += `
+      <div class="rounded-xl p-4 text-sm t-muted text-center"
+        style="background:var(--bg-sub);border:1px solid var(--border)">
+        ⚠️ Avec les notes actuelles, aucune combinaison de 2 matières ne permet d'atteindre 10.
+        Il faudrait obtenir plus de 20/20 dans certaines matières, ce qui est impossible.
+      </div>`;
+  }
 
   bloc.classList.remove('hidden');
 }
