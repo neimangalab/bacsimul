@@ -691,10 +691,121 @@
 </main>
 
 <!-- FOOTER -->
-<footer class="text-center py-10 text-xs t-faint">
-  Fait avec ❤️ pour les élèves du <span class="font-semibold t-muted">Lycée de PK12</span> · Djibouti ·
-  <span style="color:#10b981" class="font-medium">BacSimul</span> v2
+<footer class="text-center pt-10 pb-6 px-4">
+
+  <!-- Réseaux sociaux du Lycée PK12 -->
+  <div class="flex items-center justify-center gap-3 flex-wrap mb-5">
+
+    <!-- WhatsApp Canal -->
+    <a href="https://whatsapp.com/channel/0029Vb5UK6xISTkPjPovDQ3o"
+      target="_blank" rel="noopener noreferrer"
+      class="social-btn"
+      style="background:rgba(37,211,102,.12);border:1.5px solid rgba(37,211,102,.3);color:#25d366"
+      aria-label="Canal WhatsApp du Lycée PK12">
+      <!-- Icône WhatsApp SVG officiel -->
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+      </svg>
+      <span class="social-label">WhatsApp</span>
+    </a>
+
+    <!-- TikTok -->
+    <a href="https://tiktok.com/@lycee_pk12"
+      target="_blank" rel="noopener noreferrer"
+      class="social-btn"
+      style="background:rgba(255,255,255,.07);border:1.5px solid var(--border);color:var(--tx-primary)"
+      aria-label="TikTok du Lycée PK12">
+      <!-- Icône TikTok SVG -->
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.53V6.77a4.83 4.83 0 01-1.01-.08z"/>
+      </svg>
+      <span class="social-label">TikTok</span>
+    </a>
+
+    <!-- Facebook (placeholder — à remplacer par le vrai lien) -->
+    <a href="#"
+      target="_blank" rel="noopener noreferrer"
+      class="social-btn"
+      id="fb-btn"
+      style="background:rgba(24,119,242,.10);border:1.5px solid rgba(24,119,242,.3);color:#1877f2"
+      aria-label="Facebook du Lycée PK12">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+      </svg>
+      <span class="social-label">Facebook</span>
+    </a>
+
+  </div>
+
+  <!-- Compteur de visites (CountAPI) -->
+  <div class="flex items-center justify-center gap-2 mb-5">
+    <span class="text-xs t-faint">👁 Visites totales :</span>
+    <span id="visit-count"
+      class="text-xs font-bold font-mono px-2 py-0.5 rounded-full"
+      style="background:rgba(30,64,175,.1);color:#1e40af;border:1px solid rgba(30,64,175,.2)">
+      …
+    </span>
+  </div>
+
+  <!-- Ligne basse -->
+  <p class="text-xs t-faint">
+    Fait avec ❤️ pour les élèves du
+    <span class="font-semibold t-muted">Lycée de PK12</span> · Djibouti ·
+    <span style="color:#10b981" class="font-medium">BacSimul</span> v2
+  </p>
 </footer>
+
+<style>
+/* ── Boutons réseaux sociaux ── */
+.social-btn {
+  display:inline-flex; align-items:center; gap:.5rem;
+  padding:.45rem .9rem; border-radius:.75rem;
+  font-size:.78rem; font-weight:600; text-decoration:none;
+  transition:transform .18s, box-shadow .18s, opacity .18s;
+  white-space:nowrap;
+}
+.social-btn:hover {
+  transform:translateY(-2px);
+  box-shadow:0 4px 14px -4px rgba(0,0,0,.18);
+  opacity:.9;
+}
+.social-btn:active { transform:scale(.96); }
+.social-label { font-size:.75rem; }
+</style>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   COMPTEUR DE VISITES — CountAPI (gratuit, sans serveur)
+   Namespace unique pour BacSimul PK12
+   Le compteur s'incrémente à chaque chargement de la page.
+══════════════════════════════════════════════════════════════════ */
+(async function() {
+  const el = document.getElementById('visit-count');
+  if (!el) return;
+
+  try {
+    /* ── On utilise le service hits.sh pour compter les visites ── */
+    /* Namespace = lycee-pk12 · Key = bacsimul-visits */
+    const res = await fetch(
+      'https://api.countapi.xyz/hit/lycee-pk12/bacsimul-visits',
+      { cache: 'no-store' }
+    );
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.value) {
+        /* Formater avec séparateurs de milliers */
+        el.textContent = data.value.toLocaleString('fr-FR');
+        return;
+      }
+    }
+  } catch (_) { /* silencieux si hors ligne */ }
+
+  /* Fallback si API inaccessible (ex: hors ligne) */
+  el.textContent = '–';
+  el.title = 'Compteur indisponible hors connexion';
+})();
+</script>
 
 
 <!-- ══════════════════════════════════════════════════════════════════
@@ -871,6 +982,7 @@ function chargerSerie(k) {
   fs.classList.remove('hidden');
   fs.classList.add('anim-up');
   majProgression();
+  majCountdownSerie(); // ← met à jour le countdown selon la série choisie
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -1200,6 +1312,7 @@ function resetSerie() {
   ['form-section','result-section','missing-block','reco-second'].forEach(id=>
     document.getElementById(id).classList.add('hidden'));
   document.getElementById('serie-section').classList.remove('hidden');
+  tickCountdown(); // retour aux phases communes
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -1207,19 +1320,204 @@ function resetAll(){ resetSerie(); }
 
 
 /* ══════════════════════════════════════════════════════════════════
-   COUNTDOWN — Bac 2026 Djibouti
-   Oral : 31 mai → 4 juin 2026 | Écrit : 7 juin → 11 juin 2026
+   CALENDRIER OFFICIEL BAC 2026 — Ministère Éducation Nationale Djibouti
+   Source : Note de service N°168/MENFOP du 03/05/2026
+   Chaque série a ses propres phases dans l'ordre chronologique.
+   Le countdown affiche automatiquement la prochaine étape
+   selon la série sélectionnée par l'élève.
 ══════════════════════════════════════════════════════════════════ */
-const PHASES = [
-  { id:'oral',  label:'Orales',  debut:new Date('2026-05-31T07:00:00'), fin:new Date('2026-06-04T18:00:00'), dates:'31 mai – 4 juin', dot:'#f59e0b' },
-  { id:'ecrit', label:'Écrites', debut:new Date('2026-06-07T07:00:00'), fin:new Date('2026-06-11T18:00:00'), dates:'7 – 11 juin',    dot:'#10b981' },
-];
 
 /*
-  Pool de messages de motivation — tirés ALÉATOIREMENT à chaque visite,
-  indépendamment du jour. L'index est stocké en sessionStorage pour ne pas
-  changer pendant la même session, mais changer à la prochaine ouverture.
+  Structure d'une phase :
+  {
+    id        : identifiant unique
+    label     : texte affiché
+    dates     : plage de dates lisible
+    dot       : couleur du point clignotant
+    debut     : Date JS de début (countdown cible ce moment)
+    fin       : Date JS de fin
+    icon      : emoji représentatif
+    series    : ['S','ES','SG','L'] ou null = toutes les séries
+  }
 */
+const CALENDRIER_BAC = [
+
+  /* ── ÉPREUVES ANTICIPÉES / PRATIQUES ─────────────────────────── */
+  {
+    id:'svt-projets', label:'Projets SVT (série S)',
+    dates:'17 – 18 Mai 2026', icon:'🔬',
+    dot:'#8b5cf6',
+    debut: new Date('2026-05-17T07:30:00'),
+    fin:   new Date('2026-05-18T18:00:00'),
+    series: ['S'],
+  },
+  {
+    id:'maths-info-L', label:'Maths-Informatique (série L)',
+    dates:'21 Mai 2026', icon:'💻',
+    dot:'#ec4899',
+    debut: new Date('2026-05-21T08:00:00'),
+    fin:   new Date('2026-05-21T18:00:00'),
+    series: ['L'],
+  },
+  {
+    id:'pratiques-S', label:'TP Physique-Chimie, SVT & Maths (série S)',
+    dates:'19 – 23 Mai 2026', icon:'⚗️',
+    dot:'#8b5cf6',
+    debut: new Date('2026-05-19T07:30:00'),
+    fin:   new Date('2026-05-23T18:00:00'),
+    series: ['S'],
+  },
+  {
+    id:'eps-libres', label:'EPS candidats libres',
+    dates:'23 – 25 Mai 2026', icon:'🏃',
+    dot:'#f59e0b',
+    debut: new Date('2026-05-23T07:30:00'),
+    fin:   new Date('2026-05-25T18:00:00'),
+    series: null, // toutes séries
+  },
+  {
+    id:'harmo-svt', label:'Harmonisation SVT/PC/Maths',
+    dates:'31 Mai 2026 – 15h30', icon:'📋',
+    dot:'#6366f1',
+    debut: new Date('2026-05-31T15:30:00'),
+    fin:   new Date('2026-05-31T19:00:00'),
+    series: ['S'],
+  },
+  {
+    id:'harmo-eps', label:'Harmonisation EPS scolarisés',
+    dates:'1er Juin 2026', icon:'📋',
+    dot:'#f59e0b',
+    debut: new Date('2026-06-01T08:00:00'),
+    fin:   new Date('2026-06-01T18:00:00'),
+    series: null,
+  },
+
+  /* ── ÉPREUVES ORALES ─────────────────────────────────────────── */
+  {
+    id:'orales', label:'Épreuves Orales',
+    dates:'31 Mai – 4 Juin 2026', icon:'🎤',
+    dot:'#f59e0b',
+    debut: new Date('2026-05-31T07:00:00'),
+    fin:   new Date('2026-06-04T18:00:00'),
+    series: null,
+  },
+
+  /* ── ÉPREUVES ÉCRITES — 1er GROUPE ──────────────────────────── */
+  {
+    id:'ecrit1', label:'Épreuves Écrites — 1er groupe',
+    dates:'7 – 11 Juin 2026', icon:'✍️',
+    dot:'#10b981',
+    debut: new Date('2026-06-07T08:30:00'),
+    fin:   new Date('2026-06-11T18:00:00'),
+    series: null,
+  },
+
+  /* ── DÉLIBÉRATIONS 1er GROUPE ────────────────────────────────── */
+  {
+    id:'delib1-S',  label:'Délibération 1er groupe — Série S',
+    dates:'24 Juin 2026 — 08h30, Lycée de Djibouti', icon:'📢',
+    dot:'#3b5fd6',
+    debut: new Date('2026-06-24T08:30:00'),
+    fin:   new Date('2026-06-24T12:30:00'),
+    series: ['S'],
+  },
+  {
+    id:'delib1-ES', label:'Délibération 1er groupe — Série ES',
+    dates:'24 Juin 2026 — 15h30, Lycée de Hodane', icon:'📢',
+    dot:'#3b5fd6',
+    debut: new Date('2026-06-24T15:30:00'),
+    fin:   new Date('2026-06-24T17:30:00'),
+    series: ['ES'],
+  },
+  {
+    id:'delib1-SG', label:'Délibération 1er groupe — Série SG',
+    dates:'25 Juin 2026 — 08h30, Lycée Djama Youssouf', icon:'📢',
+    dot:'#3b5fd6',
+    debut: new Date('2026-06-25T08:30:00'),
+    fin:   new Date('2026-06-25T12:30:00'),
+    series: ['SG'],
+  },
+  {
+    id:'delib1-L',  label:'Délibération 1er groupe — Série L',
+    dates:'25 Juin 2026 — 15h30, Lycée PK12', icon:'📢',
+    dot:'#3b5fd6',
+    debut: new Date('2026-06-25T15:30:00'),
+    fin:   new Date('2026-06-25T17:30:00'),
+    series: ['L'],
+  },
+
+  /* ── ÉPREUVES ÉCRITES — 2ème GROUPE (Second Tour) ───────────── */
+  {
+    id:'ecrit2', label:'Second Tour — Épreuves Écrites',
+    dates:'30 Juin – 2 Juillet 2026', icon:'🔁',
+    dot:'#f43f5e',
+    debut: new Date('2026-06-30T08:00:00'),
+    fin:   new Date('2026-07-02T18:00:00'),
+    series: null,
+  },
+
+  /* ── DÉLIBÉRATIONS 2ème GROUPE ───────────────────────────────── */
+  {
+    id:'delib2-S',  label:'Résultats finaux — Série S',
+    dates:'9 Juillet 2026 — 08h30, Lycée de Djibouti', icon:'🎓',
+    dot:'#10b981',
+    debut: new Date('2026-07-09T08:30:00'),
+    fin:   new Date('2026-07-09T10:30:00'),
+    series: ['S'],
+  },
+  {
+    id:'delib2-SG', label:'Résultats finaux — Série SG',
+    dates:'9 Juillet 2026 — 11h30, Lycée Djama Youssouf', icon:'🎓',
+    dot:'#10b981',
+    debut: new Date('2026-07-09T11:30:00'),
+    fin:   new Date('2026-07-09T12:30:00'),
+    series: ['SG'],
+  },
+  {
+    id:'delib2-ES', label:'Résultats finaux — Série ES',
+    dates:'9 Juillet 2026 — 15h30, Lycée de Hodane', icon:'🎓',
+    dot:'#10b981',
+    debut: new Date('2026-07-09T15:30:00'),
+    fin:   new Date('2026-07-09T17:00:00'),
+    series: ['ES'],
+  },
+  {
+    id:'delib2-L',  label:'Résultats finaux — Série L',
+    dates:'9 Juillet 2026 — 17h30, Lycée PK12', icon:'🎓',
+    dot:'#10b981',
+    debut: new Date('2026-07-09T17:30:00'),
+    fin:   new Date('2026-07-09T18:30:00'),
+    series: ['L'],
+  },
+];
+
+/* ─────────────────────────────────────────────────────────────────
+   Obtenir les phases pertinentes selon la série active
+   Si aucune série sélectionnée → phases communes (series:null)
+   + orales + écrit1 + ecrit2
+───────────────────────────────────────────────────────────────── */
+function getPhasesParSerie(serieKey) {
+  return CALENDRIER_BAC.filter(p =>
+    p.series === null || (serieKey && p.series.includes(serieKey))
+  ).sort((a, b) => a.debut - b.debut);
+}
+
+/* Trouver la prochaine phase pertinente pour la série */
+function getPhaseActive(now, serieKey) {
+  const phases = getPhasesParSerie(serieKey);
+  // En cours en priorité
+  const enCours = phases.find(p => now >= p.debut && now <= p.fin);
+  if (enCours) return { phase: enCours, type: 'encours', cible: enCours.fin };
+  // Prochaine à venir
+  const prochaine = phases.find(p => now < p.debut);
+  if (prochaine) return { phase: prochaine, type: 'avant', cible: prochaine.debut };
+  // Tout terminé
+  return { phase: null, type: 'fini', cible: null };
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Pool de messages de motivation — aléatoires par visite
+───────────────────────────────────────────────────────────────── */
 const POOL_MOTIV = [
   { e:'🔥', t:"Le Bac ne se gagne pas le jour J — il se gagne dans les heures silencieuses d'avant. Chaque révision compte, même la plus courte." },
   { e:'💡', t:"Revois tes erreurs passées plutôt que de relire ce que tu sais déjà. C'est là que les points se gagnent vraiment." },
@@ -1235,7 +1533,6 @@ const POOL_MOTIV = [
   { e:'☀️', t:"Peu importe où tu en es dans tes révisions — il est toujours temps de progresser. Un pas en avant vaut mieux que zéro." },
 ];
 
-/* Tirer un message aléatoire une fois par session */
 function getMotivDuJour() {
   let idx = sessionStorage.getItem('bs-motiv-idx');
   if (idx === null) {
@@ -1248,37 +1545,34 @@ function getMotivDuJour() {
 let motivExpanded = false;
 function toggleMotiv() {
   motivExpanded = !motivExpanded;
-  const el = document.getElementById('motiv-text');
-  const btn = document.getElementById('motiv-more');
-  el.classList.toggle('expanded', motivExpanded);
-  btn.textContent = motivExpanded ? 'voir −' : 'voir +';
-}
-
-function getPhaseInfo(now) {
-  for(const p of PHASES){
-    if(now >= p.debut && now <= p.fin) return { phase:p, type:'encours', cible:p.fin };
-  }
-  const next = PHASES.find(p => now < p.debut);
-  if(next) return { phase:next, type:'avant', cible:next.debut };
-  return { phase:null, type:'fini', cible:null };
+  document.getElementById('motiv-text').classList.toggle('expanded', motivExpanded);
+  document.getElementById('motiv-more').textContent = motivExpanded ? 'voir −' : 'voir +';
 }
 
 function pad2(n){ return String(Math.floor(n)).padStart(2,'0'); }
 
+/* ─────────────────────────────────────────────────────────────────
+   TICK — mise à jour du countdown chaque seconde
+   Utilise `serie` (variable globale de l'app) pour filtrer les phases
+───────────────────────────────────────────────────────────────── */
 function tickCountdown() {
   const now  = new Date();
-  const info = getPhaseInfo(now);
+  // `serie` est la variable globale définie lors de la sélection de série
+  const info = getPhaseActive(now, serie || null);
 
   const elJ = document.getElementById('cd-j');
   const elH = document.getElementById('cd-h');
   const elM = document.getElementById('cd-m');
   const elS = document.getElementById('cd-s');
+  const dot = document.getElementById('phase-dot');
+  const lbl = document.getElementById('phase-label');
+  const dt  = document.getElementById('phase-dates');
 
-  if(info.type === 'fini') {
+  if (info.type === 'fini') {
     [elJ,elH,elM,elS].forEach(el=>{ el.textContent='00'; el.classList.remove('urgent'); });
-    document.getElementById('phase-dot').style.background = '#10b981';
-    document.getElementById('phase-label').textContent = '✅ Bac 2026 terminé';
-    document.getElementById('phase-dates').textContent  = 'Résultats bientôt !';
+    dot.style.background = '#10b981';
+    lbl.textContent = '🎓 Bac 2026 — Résultats publiés sur dec-menfop.dj';
+    dt.textContent  = '';
     return;
   }
 
@@ -1296,18 +1590,28 @@ function tickCountdown() {
   const urgent = jours < 2;
   [elJ,elH,elM,elS].forEach(el => el.classList.toggle('urgent', urgent));
 
-  const dot = document.getElementById('phase-dot');
-  const lbl = document.getElementById('phase-label');
-  const dt  = document.getElementById('phase-dates');
-
-  if(info.type === 'encours') {
+  if (info.type === 'encours') {
     dot.style.background = '#f43f5e';
-    lbl.textContent = `🔴 Épreuves ${info.phase.label} en cours`;
-    dt.textContent  = `Fin ${info.phase.fin.toLocaleDateString('fr-FR',{day:'numeric',month:'long'})}`;
+    lbl.textContent = `🔴 En cours — ${info.phase.icon} ${info.phase.label}`;
+    dt.textContent  = `Fin le ${info.phase.fin.toLocaleDateString('fr-FR',{day:'numeric',month:'long'})}`;
   } else {
     dot.style.background = info.phase.dot;
-    lbl.textContent = `⏳ Bac ${info.phase.label}`;
-    dt.textContent  = info.phase.dates + ' 2026';
+    // Adapter le message selon si une série est sélectionnée
+    const serieLabel = serie ? ` · Série ${serie}` : '';
+    lbl.textContent = `${info.phase.icon} ${info.phase.label}`;
+    dt.textContent  = info.phase.dates;
+  }
+}
+
+/* Appelé depuis chargerSerie() pour mettre à jour le countdown immédiatement */
+function majCountdownSerie() {
+  tickCountdown();
+  // Mettre aussi à jour la ligne de dates si on est sur écran large
+  const dt = document.getElementById('phase-dates');
+  if (dt && serie) {
+    const now  = new Date();
+    const info = getPhaseActive(now, serie);
+    if (info.phase) dt.textContent = info.phase.dates;
   }
 }
 
