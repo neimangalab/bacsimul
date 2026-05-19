@@ -775,33 +775,33 @@
 
 <script>
 /* ══════════════════════════════════════════════════════════════════
-   COMPTEUR DE VISITES — CountAPI (gratuit, sans serveur)
-   Namespace unique pour BacSimul PK12
-   Le compteur s'incrémente à chaque chargement de la page.
+   COMPTEUR DE VISITES — counterapi.dev (gratuit, sans serveur)
+   Namespace : lycee-pk12 · Key : bacsimul
+   S'incrémente à chaque ouverture et affiche le total.
 ══════════════════════════════════════════════════════════════════ */
 (async function() {
   const el = document.getElementById('visit-count');
   if (!el) return;
 
   try {
-    /* ── On utilise le service hits.sh pour compter les visites ── */
-    /* Namespace = lycee-pk12 · Key = bacsimul-visits */
+    /* counterapi.dev — successeur de countapi.xyz, API identique */
     const res = await fetch(
-      'https://api.countapi.xyz/hit/lycee-pk12/bacsimul-visits',
+      'https://api.counterapi.dev/v1/lycee-pk12/bacsimul/up',
       { cache: 'no-store' }
     );
 
     if (res.ok) {
       const data = await res.json();
-      if (data && data.value) {
-        /* Formater avec séparateurs de milliers */
-        el.textContent = data.value.toLocaleString('fr-FR');
+      /* La réponse contient { count: N } */
+      const count = data.count ?? data.value ?? null;
+      if (count !== null) {
+        el.textContent = Number(count).toLocaleString('fr-FR');
         return;
       }
     }
-  } catch (_) { /* silencieux si hors ligne */ }
+  } catch (_) { /* silencieux si hors ligne ou API indispo */ }
 
-  /* Fallback si API inaccessible (ex: hors ligne) */
+  /* Fallback propre */
   el.textContent = '–';
   el.title = 'Compteur indisponible hors connexion';
 })();
